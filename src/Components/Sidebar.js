@@ -56,14 +56,14 @@ const Sidebar = ({
   currentChatId,
   setCurrentChatId,
   createNewChat,
-  onDeleteChat
+  onDeleteChat,
 }) => {
   const categorizedChats = categorizeChats(chatHistory);
 
   return (
     <div
       className={`md:static md:translate-x-0 fixed top-0 left-0 h-screen w-64 bg-black text-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
-        isOpen ? "translate-x-0" : "-translate-x-full md:w-1/4 md:h-full"
+        isOpen ? "translate-x-0" : "-translate-x-full md:w-1/5 md:h-full"
       }`}
     >
       <div className="p-4 flex flex-col space-y-4 overflow-y-auto max-h-screen">
@@ -98,7 +98,7 @@ const Sidebar = ({
               {categorizedChats.today.map(({ chatId, date, name }) => (
                 <div
                   key={chatId}
-                  className={`flex items-center space-x-2 p-2 cursor-pointer rounded-3xl ${
+                  className={`p-2 flex flex-row items-center space-x-2 p-2 cursor-pointer rounded-3xl ${
                     chatId === currentChatId ? "bg-gray-700" : ""
                   }`}
                   onClick={() => setCurrentChatId(chatId)}
@@ -106,16 +106,19 @@ const Sidebar = ({
                   <div className="p-2 rounded-md">
                     <img src={chatIcon} alt="chat" className="h-auto" />
                   </div>
-                  <div className="basis-8/12">
-                  <p>
-                    {name || "New Chat"}
-                    {/* {new Date(date).toLocaleTimeString([], {
+                  <div className=" flex-1 basis-8/12">
+                    <p>
+                      {name || "New Chat"}
+                      {/* {new Date(date).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })} */}
-                  </p>
+                    </p>
                   </div>
-                  <RiDeleteBin6Line  onClick={() => onDeleteChat(chatId)} />
+                  <RiDeleteBin6Line
+                    className="flex-end"
+                    onClick={() => onDeleteChat(chatId)}
+                  />
                 </div>
               ))}
             </>
@@ -128,7 +131,7 @@ const Sidebar = ({
               {categorizedChats.yesterday.map(({ chatId, date, name }) => (
                 <div
                   key={chatId}
-                  className={`flex items-center space-x-2 cursor-pointer rounded-3xl ${
+                  className={`p-2 flex items-center space-x-2 cursor-pointer rounded-3xl ${
                     chatId === currentChatId ? "bg-gray-700" : ""
                   }`}
                   onClick={() => setCurrentChatId(chatId)}
@@ -136,17 +139,17 @@ const Sidebar = ({
                   <div className="p-2 rounded-md">
                     <img src={chatIcon} alt="chat" className="h-auto" />
                   </div>
-                  <div className="basis-8/12">
-                  <p>
-                    {name || "New Chat"}
-                    {/* {new Date(date).toLocaleTimeString([], {
+                  <div className="flex-1 basis-8/12">
+                    <p>
+                      {name || "New Chat"}
+                      {/* {new Date(date).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })} */}
-                  </p>
+                    </p>
                   </div>
                   <RiDeleteBin6Line onClick={() => onDeleteChat(chatId)} />
-                  </div>
+                </div>
               ))}
             </>
           )}
@@ -158,7 +161,7 @@ const Sidebar = ({
               {categorizedChats.past7Days.map(({ chatId, date, name }) => (
                 <div
                   key={chatId}
-                  className={`flex items-center space-x-2 cursor-pointer rounded-3xl ${
+                  className={`p-2 flex items-center space-x-2 cursor-pointer rounded-3xl ${
                     chatId === currentChatId ? "bg-gray-700" : ""
                   }`}
                   onClick={() => setCurrentChatId(chatId)}
@@ -166,13 +169,13 @@ const Sidebar = ({
                   <div className="p-2 rounded-md">
                     <img src={chatIcon} alt="chat" className="h-auto" />
                   </div>
-                  <div className="basis-8/12">
-                  <p>
-                    {name || "New Chat"}
-                    {/* {new Date(date).toLocaleDateString()} */}
-                  </p>
+                  <div className=" flex-1 basis-8/12">
+                    <p>
+                      {name || "New Chat"}
+                      {/* {new Date(date).toLocaleDateString()} */}
+                    </p>
                   </div>
-                  <RiDeleteBin6Line  onClick={() => onDeleteChat(chatId)} />
+                  <RiDeleteBin6Line onClick={() => onDeleteChat(chatId)} />
                 </div>
               ))}
             </>
@@ -185,7 +188,7 @@ const Sidebar = ({
               {categorizedChats.past30Days.map(({ chatId, date, name }) => (
                 <div
                   key={chatId}
-                  className={`flex items-center space-x-2 cursor-pointer rounded-3xl ${
+                  className={`p-2 flex items-center space-x-2 cursor-pointer rounded-3xl ${
                     chatId === currentChatId ? "bg-gray-700" : ""
                   }`}
                   onClick={() => setCurrentChatId(chatId)}
@@ -193,13 +196,13 @@ const Sidebar = ({
                   <div className="p-2 rounded-md">
                     <img src={chatIcon} alt="chat" className="h-auto" />
                   </div>
-                  <div className="basis-8/12">
-                  <p>
-                    {name || "New Chat"}
-                    {/* {new Date(date).toLocaleDateString()} */}
-                  </p>
+                  <div className="flex-1 basis-8/12">
+                    <p>
+                      {name || "New Chat"}
+                      {/* {new Date(date).toLocaleDateString()} */}
+                    </p>
                   </div>
-                  <RiDeleteBin6Line  onClick={() => onDeleteChat(chatId)} />
+                  <RiDeleteBin6Line onClick={() => onDeleteChat(chatId)} />
                 </div>
               ))}
             </>

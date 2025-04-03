@@ -201,7 +201,7 @@ const App = ({ isGuest, setIsGuest }) => {
         </div> */}
 
         {/* Main Screen */}
-        <div className="flex-1 bg-white py-2 px-6 overflow-hidden h-full">
+        <div className="flex-1 bg-white py-2 px-6 md:5/6">
           {!isAmbientListening ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <button
@@ -219,7 +219,7 @@ const App = ({ isGuest, setIsGuest }) => {
           ) : (
             <div className="flex flex-col h-full">
               {/* Ambient Listener Section */}
-              <div className="absolute top-4 left-4">
+              <div className="md:absolute self-center md:top-4 md:left-4">
                 <AmbientListener
                   isAmbientListening={isAmbientListening}
                   setIsAmbientListening={setIsAmbientListening}
@@ -236,21 +236,7 @@ const App = ({ isGuest, setIsGuest }) => {
                 />
               </div>
 
-              <div className="flex-1 grid grid-rows-3 grid-cols-2 gap-4 h-5/6 w-full">
-                {/* Transcript Section */}
-                <Transcription
-                  transcription={transcription}
-                  loading={loading}
-                  liveTranscription={liveTranscription}
-                />
-                {/* Summary Section */}
-                <Summary
-                  transcription={transcription}
-                  summary={summary}
-                  generateSummary={generateSummary}
-                  loadingSummary={loadingSummary}
-                />
-
+              <div className="flex-1 grid grid-rows-4 md:grid-rows-3 grid-cols-1 md:grid-cols-2 gap-4 h-full md:h-5/6 w-full overflow-auto">
                 {/* Chatbot Section */}
                 <Chatbot
                   chatHistory={chatHistory}
@@ -260,6 +246,22 @@ const App = ({ isGuest, setIsGuest }) => {
                   transcription={transcription}
                   setTranscription={setTranscription}
                 />
+                {/* Summary Section */}
+                <Summary
+                  transcription={transcription}
+                  summary={summary}
+                  generateSummary={generateSummary}
+                  loadingSummary={loadingSummary}
+                />
+                {/* Transcript Section */}
+                <Transcription
+                  transcription={transcription}
+                  loading={loading}
+                  liveTranscription={liveTranscription}
+                />
+                <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 overflow-auto">
+                  <h2 className="text-lg font-bold mb-2">Insights</h2>
+                </div>
               </div>
             </div>
           )}

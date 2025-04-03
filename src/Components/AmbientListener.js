@@ -195,16 +195,18 @@ let mediaStream;
   };
 
   return (
-    <div className="absolute ">
+    <div className="md:absolute">
       <div className="flex items-center gap-2 w-full border rounded-md bg-white shadow flex-row h-1/4 max-w-sm p-2">
         {/* Start/Stop Listening Button */}
         <button
-          onClick={toggleListening}
-          className={`px-2 py-1 text-xs text-white rounded ${
-            isAmbientListening ? "bg-red-500" : "bg-green-500"
-          }`}
+          onClick={stopRecording}
+          className="px-2 py-1 text-xs text-white rounded bg-red-500"
         >
-          {isAmbientListening ? "Stop Listening" : "Start Listening"}
+          {/*   className={`px-2 py-1 text-xs text-white rounded ${
+        //     isAmbientListening ? "bg-red-500" : "bg-green-500"
+        //   }`}
+           {isAmbientListening ? "Stop Listening" : "Start Listening"}*/}
+          Stop Listening
         </button>
        
         {/* <p>{transcription || "Waiting for speech..."}</p> */}
