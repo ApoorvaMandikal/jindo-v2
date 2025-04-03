@@ -6,6 +6,7 @@ import Chatbot from "./Components/Chatbot";
 import Transcription from "./Components/Transcription";
 import Summary from "./Components/Summary";
 import AmbientListener from "./Components/AmbientListener";
+import RealtimeTranscription from "./Components/RealtimeTranscription";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -23,7 +24,8 @@ const App = ({ isGuest, setIsGuest }) => {
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [loading, setLoading] = useState(false);
-
+  const [liveTranscription, setLiveTranscription] = useState("");
+  const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
 
   //Ambient Listening
   useEffect(() => {
@@ -51,11 +53,14 @@ const App = ({ isGuest, setIsGuest }) => {
     if (!text.trim()) return;
     setLoadingSummary(true);
     try {
-      const response = await axios.post("http://localhost:11434/api/generate", {
-        model: "llama3.2:1b",
-        prompt: `Summarize this conversation: ${text}`,
-        stream: false,
-      });
+      const response = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-4o", // Choose your model
+          prompt: `Summarize this conversation: ${text}`,
+          stream: false,
+        }
+      );
       setSummary(response.data.response);
     } catch (error) {
       console.error("Error generating summary:", error.message);
@@ -222,10 +227,22 @@ const App = ({ isGuest, setIsGuest }) => {
                   setLoading={setLoading}
                 />
               </div>
+              <div className="absolute top-4 left-72">
+                <RealtimeTranscription
+                  isAmbientListening={isAmbientListening}
+                  setIsAmbientListening={setIsAmbientListening}
+                  setLiveTranscription={setLiveTranscription}
+                  setLoading={setLoading}
+                />
+              </div>
 
               <div className="flex-1 grid grid-rows-3 grid-cols-2 gap-4 h-5/6 w-full">
                 {/* Transcript Section */}
-                <Transcription transcription={transcription} loading={loading} />
+                <Transcription
+                  transcription={transcription}
+                  loading={loading}
+                  liveTranscription={liveTranscription}
+                />
                 {/* Summary Section */}
                 <Summary
                   transcription={transcription}
