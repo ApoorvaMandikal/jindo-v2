@@ -6,6 +6,7 @@ import Chatbot from "./Components/Chatbot";
 import Transcription from "./Components/Transcription";
 import Summary from "./Components/Summary";
 import AmbientListener from "./Components/AmbientListener";
+import RealtimeTranscription from "./Components/RealtimeTranscription";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -23,7 +24,9 @@ const App = ({ isGuest, setIsGuest }) => {
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [loading, setLoading] = useState(false);
-
+  const [liveTranscription, setLiveTranscription] = useState("");
+  const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
+  const [screen, setScreen] = useState('home')
 
   //Ambient Listening
   useEffect(() => {
@@ -51,11 +54,14 @@ const App = ({ isGuest, setIsGuest }) => {
     if (!text.trim()) return;
     setLoadingSummary(true);
     try {
-      const response = await axios.post("http://localhost:11434/api/generate", {
-        model: "llama3.2:1b",
-        prompt: `Summarize this conversation: ${text}`,
-        stream: false,
-      });
+      const response = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-4o", // Choose your model
+          prompt: `Summarize this conversation: ${text}`,
+          stream: false,
+        }
+      );
       setSummary(response.data.response);
     } catch (error) {
       console.error("Error generating summary:", error.message);
@@ -154,6 +160,7 @@ const App = ({ isGuest, setIsGuest }) => {
         setCurrentChatId={setCurrentChatId}
         createNewChat={createNewChat}
         onDeleteChat={deleteChat}
+        setScreen={setScreen}
       />
 
       {isSidebarOpen && (
@@ -196,12 +203,12 @@ const App = ({ isGuest, setIsGuest }) => {
         </div> */}
 
         {/* Main Screen */}
-        <div className="flex-1 bg-white py-2 px-6 overflow-hidden h-full">
-          {!isAmbientListening ? (
+        <div className="flex-1 bg-white py-2 px-6 md:h-5/6">
+          {screen == 'home' ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <button
                 className="bg-orange-500 text-white py-3 px-6 rounded-full mb-4"
-                onClick={() => setIsAmbientListening(true)}
+                onClick={() => setScreen('chat')}
               >
                 Start Jindo Ambient AI
               </button>
@@ -214,7 +221,7 @@ const App = ({ isGuest, setIsGuest }) => {
           ) : (
             <div className="flex flex-col h-full">
               {/* Ambient Listener Section */}
-              <div className="absolute top-4 left-4">
+              <div className="md:absolute self-center md:top-4 md:left-4 hidden">
                 <AmbientListener
                   isAmbientListening={isAmbientListening}
                   setIsAmbientListening={setIsAmbientListening}
@@ -222,18 +229,16 @@ const App = ({ isGuest, setIsGuest }) => {
                   setLoading={setLoading}
                 />
               </div>
-
-              <div className="flex-1 grid grid-rows-3 grid-cols-2 gap-4 h-5/6 w-full">
-                {/* Transcript Section */}
-                <Transcription transcription={transcription} loading={loading} />
-                {/* Summary Section */}
-                <Summary
-                  transcription={transcription}
-                  summary={summary}
-                  generateSummary={generateSummary}
-                  loadingSummary={loadingSummary}
+              <div className="absolute top-4 left-72">
+                <RealtimeTranscription
+                  isAmbientListening={isAmbientListening}
+                  setIsAmbientListening={setIsAmbientListening}
+                  setLiveTranscription={setLiveTranscription}
+                  setLoading={setLoading}
                 />
+              </div>
 
+              <div className="flex-1 grid grid-rows-4 md:grid-rows-3 grid-cols-1 md:grid-cols-2 gap-4 h-full md:h-5/6 w-full overflow-auto">
                 {/* Chatbot Section */}
                 <Chatbot
                   chatHistory={chatHistory}
@@ -243,6 +248,22 @@ const App = ({ isGuest, setIsGuest }) => {
                   transcription={transcription}
                   setTranscription={setTranscription}
                 />
+                {/* Summary Section */}
+                <Summary
+                  transcription={transcription}
+                  summary={summary}
+                  generateSummary={generateSummary}
+                  loadingSummary={loadingSummary}
+                />
+                {/* Transcript Section */}
+                <Transcription
+                  transcription={transcription}
+                  loading={loading}
+                  liveTranscription={liveTranscription}
+                />
+                <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 overflow-auto">
+                  <h2 className="text-lg font-bold mb-2">Insights</h2>
+                </div>
               </div>
             </div>
           )}
