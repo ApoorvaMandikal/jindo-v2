@@ -15,19 +15,19 @@ const AmbientListener = ({
   let peerConnection;
 let mediaStream;
 
-  useEffect(() => {
-    if (isAmbientListening) {
-      startTimer();
-      startRecording();
-    } else {
-      stopTimer();
-      stopRecording(); // Ensures the microphone is released
-    }
-    return () => {
-      stopTimer();
-      stopRecording();
-    };
-  }, [isAmbientListening]);
+  // useEffect(() => {
+  //   if (isAmbientListening) {
+  //     startTimer();
+  //     startRecording();
+  //   } else {
+  //     stopTimer();
+  //     stopRecording(); // Ensures the microphone is released
+  //   }
+  //   return () => {
+  //     stopTimer();
+  //     stopRecording();
+  //   };
+  // }, [isAmbientListening]);
 
   // Timer Logic
   const startTimer = () => {

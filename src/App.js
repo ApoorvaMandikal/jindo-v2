@@ -26,6 +26,7 @@ const App = ({ isGuest, setIsGuest }) => {
   const [loading, setLoading] = useState(false);
   const [liveTranscription, setLiveTranscription] = useState("");
   const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
+  const [screen, setScreen] = useState('home')
 
   //Ambient Listening
   useEffect(() => {
@@ -159,6 +160,7 @@ const App = ({ isGuest, setIsGuest }) => {
         setCurrentChatId={setCurrentChatId}
         createNewChat={createNewChat}
         onDeleteChat={deleteChat}
+        setScreen={setScreen}
       />
 
       {isSidebarOpen && (
@@ -201,12 +203,12 @@ const App = ({ isGuest, setIsGuest }) => {
         </div> */}
 
         {/* Main Screen */}
-        <div className="flex-1 bg-white py-2 px-6 md:5/6">
-          {!isAmbientListening ? (
+        <div className="flex-1 bg-white py-2 px-6 md:h-5/6">
+          {screen == 'home' ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <button
                 className="bg-orange-500 text-white py-3 px-6 rounded-full mb-4"
-                onClick={() => setIsAmbientListening(true)}
+                onClick={() => setScreen('chat')}
               >
                 Start Jindo Ambient AI
               </button>
@@ -219,7 +221,7 @@ const App = ({ isGuest, setIsGuest }) => {
           ) : (
             <div className="flex flex-col h-full">
               {/* Ambient Listener Section */}
-              <div className="md:absolute self-center md:top-4 md:left-4">
+              <div className="md:absolute self-center md:top-4 md:left-4 hidden">
                 <AmbientListener
                   isAmbientListening={isAmbientListening}
                   setIsAmbientListening={setIsAmbientListening}

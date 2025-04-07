@@ -1,36 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 const RealtimeTranscription = ({
   setLiveTranscription,
   isAmbientListening,
   setIsAmbientListening,
 }) => {
-  const [peerConnection, setPeerConnection] = useState(null);
-  const [dataChannel, setDataChannel] = useState(null);
+  const peerConnectionRef = useRef(null);
+  const dataChannelRef = useRef(null);
+  const mediaStreamRef = useRef(null);
 
   useEffect(() => {
+    if (isAmbientListening) {
+      startWebRTCTranscription();
+    } else {
+      stopWebRTCTranscription();
+    }
     return () => {
-      if (peerConnection) {
-        peerConnection.close();
-      }
+      stopWebRTCTranscription();
     };
-  }, [peerConnection]);
+  }, [isAmbientListening]);
 
   const getEphemeralToken = async () => {
     try {
       const response = await fetch("http://127.0.0.1:8000/generate-token");
-      if (!response.ok) {
-        throw new Error("Failed to fetch ephemeral token");
-      }
-
       const data = await response.json();
-      if (!data.client_secret || !data.client_secret.value) {
-        throw new Error("No ephemeral token received");
-      }
-      console.log(data);
-      console.log("Ephemeral Token:", data.client_secret.value); // Debugging
-
-      return data.client_secret.value;
+      return data.client_secret?.value || null;
     } catch (error) {
       console.error("Error fetching ephemeral token:", error);
       return null;
@@ -45,38 +39,30 @@ const RealtimeTranscription = ({
     }
 
     const pc = new RTCPeerConnection();
-    console.log("✅ Created PeerConnection");
+    peerConnectionRef.current = pc;
 
-    // Debugging ICE connection states
     pc.oniceconnectionstatechange = () => {
       console.log("🔄 ICE Connection State:", pc.iceConnectionState);
     };
 
-    // Debugging ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         console.log("📡 Local ICE candidate:", event.candidate);
       }
     };
 
-    // Creating data channel explicitly
     const channel = pc.createDataChannel("oai-events");
-    console.log("📶 Created data channel");
+    dataChannelRef.current = channel;
 
     channel.onopen = () => console.log("🎤 Data channel opened!");
     channel.onclose = () => console.log("❌ Data channel closed!");
 
     channel.onmessage = (e) => {
-      console.log("📩 Received message:", e.data);
       try {
         const message = JSON.parse(e.data);
-        console.log(message);
         if (message.transcript) {
           console.log("📝 Live Transcription:", message.transcript);
-          console.log(
-            "🔍 setLiveTranscription type:",
-            typeof setLiveTranscription
-          );
+
           setLiveTranscription((prev) => prev + " " + message.transcript);
         }
       } catch (error) {
@@ -84,13 +70,11 @@ const RealtimeTranscription = ({
       }
     };
 
-    setDataChannel(channel);
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log("🎙️ Microphone Stream:", stream);
+      mediaStreamRef.current = stream;
+
       stream.getTracks().forEach((track) => {
-        console.log("🎤 Adding track:", track);
         pc.addTrack(track, stream);
       });
     } catch (error) {
@@ -100,9 +84,7 @@ const RealtimeTranscription = ({
 
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
-    console.log("📡 Sending SDP Offer:", offer.sdp);
 
-    // Send the offer and token to OpenAI's signaling server
     try {
       const response = await fetch("https://api.openai.com/v1/realtime", {
         method: "POST",
@@ -114,10 +96,7 @@ const RealtimeTranscription = ({
       });
 
       if (!response.ok) {
-        console.error(
-          "❌ Failed to connect to OpenAI Realtime API",
-          await response.text()
-        );
+        console.error("❌ Failed to connect to OpenAI Realtime API", await response.text());
         return;
       }
 
@@ -125,7 +104,6 @@ const RealtimeTranscription = ({
         type: "answer",
         sdp: await response.text(),
       };
-      console.log("✅ OpenAI Response SDP:", answer.sdp);
       await pc.setRemoteDescription(answer);
     } catch (error) {
       console.error("🚨 Error during WebRTC signaling:", error);
@@ -135,26 +113,45 @@ const RealtimeTranscription = ({
   const stopWebRTCTranscription = () => {
     console.log("🛑 Stopping transcription...");
 
-    if (peerConnection) {
-      peerConnection.getSenders().forEach((sender) => {
-        if (sender.track) {
-          sender.track.stop(); // Stop microphone track
+    // Close data channel
+    const dc = dataChannelRef.current;
+    if (dc) {
+      dc.onmessage = null;
+      dc.onopen = null;
+      dc.onclose = null;
+      if (dc.readyState === "open") {
+        dc.close();
+      }
+      dataChannelRef.current = null;
+    }
+
+    // Stop and close peer connection
+    const pc = peerConnectionRef.current;
+    if (pc) {
+      pc.getSenders().forEach((sender) => {
+        sender.track?.stop();
+      });
+
+      pc.getTransceivers().forEach((transceiver) => {
+        try {
+          transceiver.stop?.();
+        } catch (err) {
+          console.warn("⚠️ Error stopping transceiver:", err);
         }
       });
 
-      peerConnection.onicecandidate = null;
-      peerConnection.oniceconnectionstatechange = null;
-      peerConnection.ontrack = null;
-      peerConnection.close();
-      setPeerConnection(null);
+      pc.onicecandidate = null;
+      pc.oniceconnectionstatechange = null;
+      pc.ontrack = null;
+      pc.close();
+      peerConnectionRef.current = null;
     }
 
-    if (dataChannel) {
-      dataChannel.onmessage = null; // Remove event listeners
-      dataChannel.onopen = null;
-      dataChannel.onclose = null;
-      dataChannel.close();
-      setDataChannel(null);
+    // Stop media stream
+    const stream = mediaStreamRef.current;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
     }
 
     console.log("✅ Transcription stopped successfully.");
@@ -162,8 +159,21 @@ const RealtimeTranscription = ({
 
   return (
     <div>
-      <button onClick={startWebRTCTranscription}>Start Transcription</button>
-      <button onClick={stopWebRTCTranscription}>Stop Transcription</button>
+      <div className="space-x-4">
+        <button
+          onClick={startWebRTCTranscription}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200"
+        >
+          Start Transcription
+        </button>
+        <button
+          onClick={stopWebRTCTranscription}
+          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
+        >
+          Stop Transcription
+        </button>
+      </div>
+
       {/* <div>
         <h3>Transcription:</h3>
         <p>{transcription}</p>
@@ -171,5 +181,7 @@ const RealtimeTranscription = ({
     </div>
   );
 };
+
+
 
 export default RealtimeTranscription;

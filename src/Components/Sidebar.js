@@ -57,6 +57,7 @@ const Sidebar = ({
   setCurrentChatId,
   createNewChat,
   onDeleteChat,
+  setScreen,
 }) => {
   const categorizedChats = categorizeChats(chatHistory);
 
@@ -84,7 +85,10 @@ const Sidebar = ({
 
         <button
           className="bg-jindo-blue text-white py-4 px-4 rounded-3xl mx-4 my-8"
-          onClick={createNewChat}
+          onClick={() => {
+            createNewChat();
+            setScreen("home");
+          }}
         >
           + New Conversation
         </button>
