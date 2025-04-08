@@ -1,7 +1,7 @@
 import React from "react";
 
 const Summary = ({
-  transcription,
+  liveTranscription,
   summary,
   generateSummary,
   loadingSummary,
@@ -9,8 +9,8 @@ const Summary = ({
   return (
     <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-2 md:row-start-1 col-start-1 md:col-start-2 row-span-1 overflow-auto">     
      <button
-        onClick={() => generateSummary(transcription)}
-        disabled={loadingSummary || !transcription}
+        onClick={() => generateSummary(liveTranscription)}
+        disabled={loadingSummary || !liveTranscription }
       >
         <h2 className="text-lg font-bold mb-2">Summary</h2>
       </button>
