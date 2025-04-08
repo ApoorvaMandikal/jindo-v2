@@ -26,7 +26,7 @@ const App = ({ isGuest, setIsGuest }) => {
   const [loading, setLoading] = useState(false);
   const [liveTranscription, setLiveTranscription] = useState("");
   const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
-  const [screen, setScreen] = useState('home')
+  const [screen, setScreen] = useState("home");
 
   //Ambient Listening
   useEffect(() => {
@@ -55,14 +55,22 @@ const App = ({ isGuest, setIsGuest }) => {
     setLoadingSummary(true);
     try {
       const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
+        // "https://api.openai.com/v1/chat/completions",
+        "http://localhost:8000/summary",
         {
-          model: "gpt-4o", // Choose your model
-          prompt: `Summarize this conversation: ${text}`,
-          stream: false,
+          // model: "gpt-4o", // Choose your model
+          // prompt: `Summarize this conversation: ${text}`,
+          // stream: false,
+
+          text
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
-      setSummary(response.data.response);
+      setSummary(response.data.summary);
     } catch (error) {
       console.error("Error generating summary:", error.message);
       setSummary("Error generating summary. Please try again.");
@@ -204,11 +212,11 @@ const App = ({ isGuest, setIsGuest }) => {
 
         {/* Main Screen */}
         <div className="flex-1 bg-white py-2 px-6 md:h-5/6">
-          {screen == 'home' ? (
+          {screen == "home" ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <button
                 className="bg-orange-500 text-white py-3 px-6 rounded-full mb-4"
-                onClick={() => setScreen('chat')}
+                onClick={() => setScreen("chat")}
               >
                 Start Jindo Ambient AI
               </button>
@@ -250,7 +258,7 @@ const App = ({ isGuest, setIsGuest }) => {
                 />
                 {/* Summary Section */}
                 <Summary
-                  transcription={transcription}
+                  liveTranscription={liveTranscription}
                   summary={summary}
                   generateSummary={generateSummary}
                   loadingSummary={loadingSummary}

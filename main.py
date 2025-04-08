@@ -3,6 +3,8 @@ import os
 import requests  # Ensure you imported requests
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from fastapi import Request
+
 
 # Load environment variables
 load_dotenv()
@@ -82,6 +84,48 @@ async def chat_completion(request_data: dict):
             return {"error": "Failed to get chat response", "details": response.text}
 
         return response.json()  # Return OpenAI's response to the frontend
+
+    except Exception as e:
+        return {"error": "Request failed", "details": str(e)}
+
+#Summary
+@app.post("/summary")
+async def generate_summary(request: Request):
+    if not OPENAI_API_KEY:
+        return {"error": "OpenAI API key is missing"}
+
+    data = await request.json()
+    text = data.get("text", "")
+    
+    if not text.strip():
+        return {"error": "No text provided for summary"}
+
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    messages = [
+        {"role": "system", "content": "Summarize this conversation."},
+        {"role": "user", "content": text}
+    ]
+
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json={
+                "model": "gpt-4o",
+                "messages": messages,
+            },
+        )
+
+        if response.status_code != 200:
+            return {"error": "Failed to generate summary", "details": response.text}
+
+        result = response.json()
+        summary = result["choices"][0]["message"]["content"]
+        return {"summary": summary}
 
     except Exception as e:
         return {"error": "Request failed", "details": str(e)}
