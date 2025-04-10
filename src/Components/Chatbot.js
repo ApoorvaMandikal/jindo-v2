@@ -26,7 +26,7 @@ const Chatbot = ({
     try {
       const response = await axios.post(
         "http://localhost:8000/chat", // ✅ Calls FastAPI backend
-        {
+                {
           model: "gpt-4o", // Choose your model
           messages: conversation,
           stream: false, // Standard API call (not streaming)
@@ -187,11 +187,11 @@ const Chatbot = ({
   };
 
   return (
-    <div className="p-6 border rounded-lg bg-white shadow col-span-1 col-start-1 row-start-1 md:row-start-2 md:col-start-2 row-span-2 md:row-span-2 flex flex-col overflow-auto">
+    <div className="relative flex flex-col h-full">
       {" "}
       <h2 className="text-lg font-bold mb-2">Ask Jindo</h2>
       <div
-        className={`w-full flex flex-col space-y-4 overflow-auto  
+        className={`w-full flex-1 pr-2 space-y-4 overflow-y-auto pr-2 pb-10
 
                 ${
                   chatHistory[currentChatId]?.messages?.length
@@ -231,7 +231,7 @@ const Chatbot = ({
         </div>
       )}
       {/* Input Section */}
-      <div className="p-4 flex items-center justify-center">
+      <div className="absolute bg-white pt-1 bottom-0 left-0 right-0 flex items-center justify-center">
         <div className="w-4/5 h-14">
           {/* <input
               type="text"
