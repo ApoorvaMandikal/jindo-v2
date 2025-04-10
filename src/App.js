@@ -62,7 +62,7 @@ const App = ({ isGuest, setIsGuest }) => {
           // prompt: `Summarize this conversation: ${text}`,
           // stream: false,
 
-          text
+          text,
         },
         {
           headers: {
@@ -227,7 +227,7 @@ const App = ({ isGuest, setIsGuest }) => {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-auto gap-4 md:h-full">
               {/* Ambient Listener Section */}
               <div className="md:absolute self-center md:top-4 md:left-4 hidden">
                 <AmbientListener
@@ -237,7 +237,7 @@ const App = ({ isGuest, setIsGuest }) => {
                   setLoading={setLoading}
                 />
               </div>
-              <div className="absolute top-4 left-72">
+              <div className="md:absolute self-center top-4 md:left-36 lg:left-72">
                 <RealtimeTranscription
                   isAmbientListening={isAmbientListening}
                   setIsAmbientListening={setIsAmbientListening}
@@ -246,30 +246,36 @@ const App = ({ isGuest, setIsGuest }) => {
                 />
               </div>
 
-              <div className="flex-1 grid grid-rows-4 md:grid-rows-3 grid-cols-1 md:grid-cols-2 gap-4 h-full md:h-5/6 w-full overflow-auto">
+              <div className="flex-1 grid grid-rows-[auto_auto] md:grid-rows-3 grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-5/6 w-full overflow-auto">
                 {/* Chatbot Section */}
-                <Chatbot
-                  chatHistory={chatHistory}
-                  setChatHistory={setChatHistory}
-                  currentChatId={currentChatId}
-                  setCurrentChatId={setCurrentChatId}
-                  transcription={transcription}
-                  setTranscription={setTranscription}
-                />
+                <div className="p-4 border rounded-lg bg-white shadow col-span-1 col-start-1 row-start-1 md:row-start-2 md:col-start-2 md:row-span-2 flex flex-col h-72 md:h-full overflow-y-auto">
+                  <Chatbot
+                    chatHistory={chatHistory}
+                    setChatHistory={setChatHistory}
+                    currentChatId={currentChatId}
+                    setCurrentChatId={setCurrentChatId}
+                    transcription={transcription}
+                    setTranscription={setTranscription}
+                  />
+                </div>
                 {/* Summary Section */}
-                <Summary
-                  liveTranscription={liveTranscription}
-                  summary={summary}
-                  generateSummary={generateSummary}
-                  loadingSummary={loadingSummary}
-                />
+                <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-2 md:row-start-1 col-start-1 md:col-start-2 row-span-1 h-40 md:h-auto overflow-auto">
+                  <Summary
+                    liveTranscription={liveTranscription}
+                    summary={summary}
+                    generateSummary={generateSummary}
+                    loadingSummary={loadingSummary}
+                  />
+                </div>
                 {/* Transcript Section */}
-                <Transcription
-                  transcription={transcription}
-                  loading={loading}
-                  liveTranscription={liveTranscription}
-                />
-                <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 overflow-auto">
+                <div className="p-4 border rounded-lg bg-white shadow md:col-start-1 col-span-1 row-span-1 md:row-span-2 row-start-3 md:row-start-2 h-40 md:h-auto overflow-auto">
+                  <Transcription
+                    transcription={transcription}
+                    loading={loading}
+                    liveTranscription={liveTranscription}
+                  />
+                </div>
+                <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-40 md:h-auto overflow-auto">
                   <h2 className="text-lg font-bold mb-2">Insights</h2>
                 </div>
               </div>
