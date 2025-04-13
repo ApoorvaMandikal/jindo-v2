@@ -13,7 +13,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000","https://d38bqbwa18mjva.cloudfront.net",],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
