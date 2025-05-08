@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Rolling from "./../assets/Rolling.svg";
 import next from "./../assets/next.png";
@@ -12,6 +12,7 @@ const Chatbot = ({
   setCurrentChatId,
   transcription,
   setTranscription,
+  clientFileText
 }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,14 +22,38 @@ const Chatbot = ({
   const [initialized, setInitialized] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
-  async function sendMessageToLlama(conversation) {
+
+
+  async function sendMessageToModel(conversation, clientFileText) {
     try {
+      const messages = [
+        {
+          role: "system",
+          content: [
+            {
+              type: "text",
+              text:
+                "You are an assistant in a wealth management company. Use the following client portfolio data as context:\n\n" +
+                clientFileText,
+            },
+          ],
+        },
+        ...conversation.map((msg) => ({
+          role: msg.role,
+          content: [
+            {
+              type: "text",
+              text: msg.content,
+            },
+          ],
+        })),
+      ];
+
       const response = await axios.post(
         "http://localhost:8000/chat", // ✅ Calls FastAPI backend
                 {
           model: "gpt-4o", // Choose your model
-          messages: conversation,
+          messages: messages,
           stream: false, // Standard API call (not streaming)
         },
         {
@@ -38,9 +63,21 @@ const Chatbot = ({
         }
       );
 
-      return response.data.choices[0].message.content;
+      if (
+        response.data &&
+        response.data.choices &&
+        response.data.choices.length > 0
+      ) {
+        return response.data.choices[0].message.content;
+      } else {
+        console.error("Invalid response from GPT:", response.data);
+        throw new Error("Invalid response structure from GPT.");
+      }
     } catch (error) {
-      console.error("Error communicating with gpt-4o:", error.message);
+      console.error(
+        "Error communicating with gpt-4o:",
+        error?.response?.data || error.message
+      );
       throw new Error("Error connecting to the assistant.");
     }
   }
@@ -111,10 +148,10 @@ const Chatbot = ({
     }
 
     try {
-      const assistantReply = await sendMessageToLlama([
-        ...(chatHistory[currentChatId]?.messages || []),
-        newMessage,
-      ]);
+      const assistantReply = await sendMessageToModel(
+        [...(chatHistory[currentChatId]?.messages || []), newMessage],
+        clientFileText //
+      );
 
       setChatHistory((prev) => {
         const updatedChat = {
@@ -191,7 +228,7 @@ const Chatbot = ({
       {" "}
       <h2 className="text-lg font-bold mb-2">Ask Jindo</h2>
       <div
-        className={`w-full flex-1 pr-2 space-y-4 overflow-y-auto pr-2 pb-10
+        className={`w-full flex-1 pr-2 space-y-4 overflow-y-auto pr-2 pb-16
 
                 ${
                   chatHistory[currentChatId]?.messages?.length

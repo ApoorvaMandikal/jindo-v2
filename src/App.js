@@ -7,6 +7,7 @@ import Transcription from "./Components/Transcription";
 import Summary from "./Components/Summary";
 import AmbientListener from "./Components/AmbientListener";
 import RealtimeTranscription from "./Components/RealtimeTranscription";
+import Insights from "./Components/Insights";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -27,6 +28,43 @@ const App = ({ isGuest, setIsGuest }) => {
   const [liveTranscription, setLiveTranscription] = useState("");
   const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
   const [screen, setScreen] = useState("home");
+  const [clientFileText, setclientFileText] = useState("");
+  const [insights, setInsights] = useState("");
+
+  useEffect(() => {
+    const fetchPatientFile = async () => {
+      const res = await fetch(
+        "http://127.0.0.1:8000/load-patient-file/Cindy_Johnson"
+      );
+      const data = await res.json();
+      if (!data.file_text) {
+        console.warn("Patient file not loaded:", data);
+      } else {
+        console.log("Patient file loaded successfully:", data);
+        setclientFileText(data.file_text); // Make sure you store it
+      }
+
+      const text = data.file_text;
+      setclientFileText(text);
+      const insightsRes = await fetch("http://127.0.0.1:8000/insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      const insightsData = await insightsRes.json();
+      console.log("🧠 Insights response:", insightsData);
+
+
+      if (insightsData.insights) {
+        setInsights(insightsData.insights);
+      } else {
+        console.warn("Insights not generated:", insightsData);
+      }
+    };
+
+    fetchPatientFile();
+  }, []);
 
   //Ambient Listening
   useEffect(() => {
@@ -49,7 +87,7 @@ const App = ({ isGuest, setIsGuest }) => {
       .padStart(2, "0")}`;
   };
 
-  // Function to generate summary using the LLaMA model
+  // Function to generate summary using the model
   const generateSummary = async (text) => {
     if (!text.trim()) return;
     setLoadingSummary(true);
@@ -57,7 +95,7 @@ const App = ({ isGuest, setIsGuest }) => {
       const response = await axios.post(
         // "https://api.openai.com/v1/chat/completions",
         "http://localhost:8000/summary",
-        {
+                {
           // model: "gpt-4o", // Choose your model
           // prompt: `Summarize this conversation: ${text}`,
           // stream: false,
@@ -256,6 +294,7 @@ const App = ({ isGuest, setIsGuest }) => {
                     setCurrentChatId={setCurrentChatId}
                     transcription={transcription}
                     setTranscription={setTranscription}
+                    clientFileText={clientFileText}
                   />
                 </div>
                 {/* Summary Section */}
@@ -275,8 +314,9 @@ const App = ({ isGuest, setIsGuest }) => {
                     liveTranscription={liveTranscription}
                   />
                 </div>
+                {/*Insights Section */}
                 <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-40 md:h-auto overflow-auto">
-                  <h2 className="text-lg font-bold mb-2">Insights</h2>
+                  <Insights insights={insights} />
                 </div>
               </div>
             </div>
