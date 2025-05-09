@@ -175,12 +175,12 @@ async def generate_insights(request: Request):
         return {"error": "Request failed", "details": str(e)}
 
 #client_file
-@app.get("/load-patient-file/{patient_id}")
-async def load_patient_file(patient_id: str):
-    file_path = f"./Clients/{patient_id}.pdf"
+@app.get("/load-client-file/{client_id}")
+async def load_client_file(client_id: str):
+    file_path = f"./Clients/{client_id}.pdf"
 
     if not os.path.exists(file_path):
-        return {"error": f"File for patient '{patient_id}' not found."}
+        return {"error": f"File for client '{client_id}' not found."}
 
     try:
         text = ""
@@ -190,7 +190,7 @@ async def load_patient_file(patient_id: str):
                 if page_text:
                     text += page_text + "\n"
 
-        return {"patient_id": patient_id, "file_text": text}
+        return {"client_id": client_id, "file_text": text}
 
     except Exception as e:
         return {"error": "Failed to read PDF file", "details": str(e)}

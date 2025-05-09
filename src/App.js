@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Sidebar from "./Components/Sidebar";
 import Header from "./Components/Header";
@@ -8,6 +8,7 @@ import Summary from "./Components/Summary";
 import AmbientListener from "./Components/AmbientListener";
 import RealtimeTranscription from "./Components/RealtimeTranscription";
 import Insights from "./Components/Insights";
+import { useClientFileAndInsights } from "./hooks/useClientFileAndInsights";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -28,56 +29,20 @@ const App = ({ isGuest, setIsGuest }) => {
   const [liveTranscription, setLiveTranscription] = useState("");
   const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
   const [screen, setScreen] = useState("home");
-  const [clientFileText, setclientFileText] = useState("");
-  const [insights, setInsights] = useState("");
-
-  useEffect(() => {
-    const fetchPatientFile = async () => {
-      const res = await fetch(
-        "http://127.0.0.1:8000/load-patient-file/Cindy_Johnson"
-      );
-      const data = await res.json();
-      if (!data.file_text) {
-        console.warn("Patient file not loaded:", data);
-      } else {
-        console.log("Patient file loaded successfully:", data);
-        setclientFileText(data.file_text); // Make sure you store it
-      }
-
-      const text = data.file_text;
-      setclientFileText(text);
-      const insightsRes = await fetch("http://127.0.0.1:8000/insights", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-
-      const insightsData = await insightsRes.json();
-      console.log("🧠 Insights response:", insightsData);
-
-
-      if (insightsData.insights) {
-        setInsights(insightsData.insights);
-      } else {
-        console.warn("Insights not generated:", insightsData);
-      }
-    };
-
-    fetchPatientFile();
-  }, []);
+  const { clientFileText, insights} = useClientFileAndInsights("Cindy_Johnson");
 
   //Ambient Listening
-  useEffect(() => {
-    let timer = null;
+  // useEffect(() => {
+  //   let timer = null;
 
-    if (!isPaused) {
-      timer = setInterval(() => {
-        setElapsedTime((prev) => prev + 1);
-      }, 1000);
-    }
+  //   if (!isPaused) {
+  //     timer = setInterval(() => {
+  //       setElapsedTime((prev) => prev + 1);
+  //     }, 1000);
+  //   }
 
-    return () => clearInterval(timer);
-  }, [isPaused]);
+  //   return () => clearInterval(timer);
+  // }, [isPaused]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -95,13 +60,16 @@ const App = ({ isGuest, setIsGuest }) => {
       const response = await axios.post(
         // "https://api.openai.com/v1/chat/completions",
         "http://localhost:8000/summary",
-                {
+        //"https://54.80.147.140/summary",
+        //"https://demo.jindolabs.com/summary",
+        {
           // model: "gpt-4o", // Choose your model
           // prompt: `Summarize this conversation: ${text}`,
           // stream: false,
 
           text,
         },
+
         {
           headers: {
             "Content-Type": "application/json",
