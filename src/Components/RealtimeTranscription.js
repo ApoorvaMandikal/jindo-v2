@@ -22,7 +22,11 @@ const RealtimeTranscription = ({
 
   const getEphemeralToken = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/generate-token");
+      const response = await fetch(
+        "http://127.0.0.1:8000/generate-token"
+        //"https://54.80.147.140/generate-token"
+        //"https://demo.jindolabs.com/generate-token"
+      );
       const data = await response.json();
       return data.client_secret?.value || null;
     } catch (error) {
@@ -96,7 +100,10 @@ const RealtimeTranscription = ({
       });
 
       if (!response.ok) {
-        console.error("❌ Failed to connect to OpenAI Realtime API", await response.text());
+        console.error(
+          "❌ Failed to connect to OpenAI Realtime API",
+          await response.text()
+        );
         return;
       }
 
@@ -181,7 +188,5 @@ const RealtimeTranscription = ({
     </div>
   );
 };
-
-
 
 export default RealtimeTranscription;

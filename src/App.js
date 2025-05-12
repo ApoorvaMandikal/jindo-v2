@@ -9,6 +9,7 @@ import AmbientListener from "./Components/AmbientListener";
 import RealtimeTranscription from "./Components/RealtimeTranscription";
 import Insights from "./Components/Insights";
 import { useClientFileAndInsights } from "./hooks/useClientFileAndInsights";
+import Client_Sidebar from "./Components/Sidebar/Client_Sidebar";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -27,9 +28,10 @@ const App = ({ isGuest, setIsGuest }) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [loading, setLoading] = useState(false);
   const [liveTranscription, setLiveTranscription] = useState("");
-  const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
   const [screen, setScreen] = useState("home");
-  const { clientFileText, insights} = useClientFileAndInsights("Cindy_Johnson");
+  const [selectedClient, setSelectedClient] = useState("Cindy_Johnson");
+  const { clientFileText, insights} = useClientFileAndInsights(selectedClient);
+
 
   //Ambient Listening
   // useEffect(() => {
@@ -166,7 +168,7 @@ const App = ({ isGuest, setIsGuest }) => {
   return (
     <div className="flex h-screen font-sans">
       {/* Sidebar */}
-      <Sidebar
+      <Client_Sidebar
         isOpen={isSidebarOpen}
         toggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
         chatHistory={chatHistory}
@@ -175,6 +177,8 @@ const App = ({ isGuest, setIsGuest }) => {
         createNewChat={createNewChat}
         onDeleteChat={deleteChat}
         setScreen={setScreen}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
       />
 
       {isSidebarOpen && (
@@ -263,6 +267,7 @@ const App = ({ isGuest, setIsGuest }) => {
                     transcription={transcription}
                     setTranscription={setTranscription}
                     clientFileText={clientFileText}
+                    selectedClient={selectedClient}
                   />
                 </div>
                 {/* Summary Section */}
@@ -272,6 +277,7 @@ const App = ({ isGuest, setIsGuest }) => {
                     summary={summary}
                     generateSummary={generateSummary}
                     loadingSummary={loadingSummary}
+                    selectedClient={selectedClient}
                   />
                 </div>
                 {/* Transcript Section */}
@@ -284,7 +290,7 @@ const App = ({ isGuest, setIsGuest }) => {
                 </div>
                 {/*Insights Section */}
                 <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-40 md:h-auto overflow-auto">
-                  <Insights insights={insights} />
+                  <Insights insights={insights} selectedClient={selectedClient} />
                 </div>
               </div>
             </div>

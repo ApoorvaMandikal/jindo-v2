@@ -1,7 +1,9 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import { useClientFileAndInsights } from "../hooks/useClientFileAndInsights";
 
-const Insights = ({ insights }) => {
+const Insights = ({ selectedClient }) => {
+  const {insights} = useClientFileAndInsights(selectedClient);
   return (
     <div className="flex flex-col h-full">
       <div>

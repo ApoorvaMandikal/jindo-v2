@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useClientFileAndInsights(clientName) {
+export function useClientFileAndInsights(selectedClient) {
   const hasRun = useRef(false);
   const [clientFileText, setClientFileText] = useState("");
   const [insights, setInsights] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
-      if (hasRun.current) return;
-      hasRun.current = true;
+    //   if (hasRun.current) return;
+    //   hasRun.current = true;
 
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/load-client-file/${clientName}`
+          `http://127.0.0.1:8000/load-client-file/${selectedClient}`
         );
         const data = await res.json();
 
@@ -22,6 +22,7 @@ export function useClientFileAndInsights(clientName) {
         }
 
         console.log("✅ client file loaded:", data);
+        console.log(selectedClient);
         const text = data.file_text;
         setClientFileText(text);
 
@@ -45,7 +46,7 @@ export function useClientFileAndInsights(clientName) {
     };
 
     fetchData();
-  }, [clientName]);
+  }, [selectedClient]);
 
   return { clientFileText, insights };
 }

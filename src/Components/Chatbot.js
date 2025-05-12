@@ -12,7 +12,8 @@ const Chatbot = ({
   setCurrentChatId,
   transcription,
   setTranscription,
-  clientFileText
+  clientFileText,
+  selectedClient
 }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +52,10 @@ const Chatbot = ({
 
       const response = await axios.post(
         "http://localhost:8000/chat", // ✅ Calls FastAPI backend
-                {
+        //"https://54.80.147.140/chat",
+        //"https://demo.jindolabs.com/chat",
+
+        {
           model: "gpt-4o", // Choose your model
           messages: messages,
           stream: false, // Standard API call (not streaming)
