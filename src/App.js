@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Sidebar from "./Components/Sidebar";
 import Header from "./Components/Header";
@@ -7,6 +7,8 @@ import Transcription from "./Components/Transcription";
 import Summary from "./Components/Summary";
 import AmbientListener from "./Components/AmbientListener";
 import RealtimeTranscription from "./Components/RealtimeTranscription";
+import Insights from "./Components/Insights";
+import { useClientFileAndInsights } from "./hooks/useClientFileAndInsights";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -27,19 +29,20 @@ const App = ({ isGuest, setIsGuest }) => {
   const [liveTranscription, setLiveTranscription] = useState("");
   const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
   const [screen, setScreen] = useState("home");
+  const { clientFileText, insights} = useClientFileAndInsights("Cindy_Johnson");
 
   //Ambient Listening
-  useEffect(() => {
-    let timer = null;
+  // useEffect(() => {
+  //   let timer = null;
 
-    if (!isPaused) {
-      timer = setInterval(() => {
-        setElapsedTime((prev) => prev + 1);
-      }, 1000);
-    }
+  //   if (!isPaused) {
+  //     timer = setInterval(() => {
+  //       setElapsedTime((prev) => prev + 1);
+  //     }, 1000);
+  //   }
 
-    return () => clearInterval(timer);
-  }, [isPaused]);
+  //   return () => clearInterval(timer);
+  // }, [isPaused]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -49,7 +52,7 @@ const App = ({ isGuest, setIsGuest }) => {
       .padStart(2, "0")}`;
   };
 
-  // Function to generate summary using the LLaMA model
+  // Function to generate summary using the model
   const generateSummary = async (text) => {
     if (!text.trim()) return;
     setLoadingSummary(true);
@@ -57,6 +60,8 @@ const App = ({ isGuest, setIsGuest }) => {
       const response = await axios.post(
         // "https://api.openai.com/v1/chat/completions",
         "http://localhost:8000/summary",
+        //"https://54.80.147.140/summary",
+        //"https://demo.jindolabs.com/summary",
         {
           // model: "gpt-4o", // Choose your model
           // prompt: `Summarize this conversation: ${text}`,
@@ -64,6 +69,7 @@ const App = ({ isGuest, setIsGuest }) => {
 
           text,
         },
+
         {
           headers: {
             "Content-Type": "application/json",
@@ -256,6 +262,7 @@ const App = ({ isGuest, setIsGuest }) => {
                     setCurrentChatId={setCurrentChatId}
                     transcription={transcription}
                     setTranscription={setTranscription}
+                    clientFileText={clientFileText}
                   />
                 </div>
                 {/* Summary Section */}
@@ -275,8 +282,9 @@ const App = ({ isGuest, setIsGuest }) => {
                     liveTranscription={liveTranscription}
                   />
                 </div>
+                {/*Insights Section */}
                 <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-40 md:h-auto overflow-auto">
-                  <h2 className="text-lg font-bold mb-2">Insights</h2>
+                  <Insights insights={insights} />
                 </div>
               </div>
             </div>

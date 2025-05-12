@@ -4,6 +4,8 @@ import requests  # Ensure you imported requests
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from fastapi import Request
+import pdfplumber
+
 
 
 # Load environment variables
@@ -129,3 +131,66 @@ async def generate_summary(request: Request):
 
     except Exception as e:
         return {"error": "Request failed", "details": str(e)}
+
+#Insights
+@app.post("/insights")
+async def generate_insights(request: Request):
+    if not OPENAI_API_KEY:
+        return {"error": "OpenAI API key is missing"}
+
+    data = await request.json()
+    text = data.get("text", "")
+    
+    if not text.strip():
+        return {"error": "No text provided for insights"}
+
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    messages = [
+        {"role": "system", "content": "Summarize this file and highlight the key main 3 points in short."},
+        {"role": "user", "content": text}
+    ]
+
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json={
+                "model": "gpt-4o",
+                "messages": messages,
+            },
+        )
+
+        if response.status_code != 200:
+            return {"error": "Failed to generate insights", "details": response.text}
+
+        result = response.json()
+        insights = result["choices"][0]["message"]["content"]
+        return {"insights": insights}
+
+    except Exception as e:
+        return {"error": "Request failed", "details": str(e)}
+
+#client_file
+@app.get("/load-client-file/{client_id}")
+async def load_client_file(client_id: str):
+    file_path = f"./Clients/{client_id}.pdf"
+
+    if not os.path.exists(file_path):
+        return {"error": f"File for client '{client_id}' not found."}
+
+    try:
+        text = ""
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
+
+        return {"client_id": client_id, "file_text": text}
+
+    except Exception as e:
+        return {"error": "Failed to read PDF file", "details": str(e)}
