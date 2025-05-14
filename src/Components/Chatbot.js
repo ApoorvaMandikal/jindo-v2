@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Rolling from "./../assets/Rolling.svg";
 import next from "./../assets/next.png";
@@ -22,6 +22,13 @@ const Chatbot = ({
   const [recognitionInstance, setRecognitionInstance] = useState(null);
   const [initialized, setInitialized] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatHistory, currentChatId]);
 
   async function sendMessageToModel(conversation, clientFileText) {
     try {
@@ -136,7 +143,11 @@ const Chatbot = ({
     setLoading(true);
     setError("");
 
-    const newMessage = { role: "user", content: input };
+    const newMessage = {
+      role: "user",
+      content: input,
+      timestamp: new Date().toISOString(),
+    };
 
     // Add user message
     const updatedUserChat = {
@@ -167,7 +178,11 @@ const Chatbot = ({
         ...updatedUserChat,
         messages: [
           ...updatedUserChat.messages,
-          { role: "assistant", content: assistantReply },
+          {
+            role: "assistant",
+            content: assistantReply,
+            timestamp: new Date().toISOString(),
+          },
         ],
       };
 
@@ -277,10 +292,19 @@ const Chatbot = ({
                     {line}
                   </p>
                 ))}
+                {message.timestamp && (
+                  <p className="text-xs mt-1 opacity-60">
+                    {new Date(message.timestamp).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                )}
               </div>
             </div>
           )
         )}
+        <div ref={messagesEndRef} />
       </div>
       {error && (
         <div className="text-red-600 text-sm text-center">
