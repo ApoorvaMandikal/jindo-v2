@@ -30,8 +30,10 @@ const App = ({ isGuest, setIsGuest }) => {
   const [liveTranscription, setLiveTranscription] = useState("");
   const [screen, setScreen] = useState("home");
   const [selectedClient, setSelectedClient] = useState("Cindy_Johnson");
-  const { clientFileText, insights} = useClientFileAndInsights(selectedClient);
-
+  const { clientFileText, insights } = useClientFileAndInsights(selectedClient);
+  const [transcriptions, setTranscriptions] = useState({});
+  const [summaries, setSummaries] = useState({});
+  
 
   //Ambient Listening
   // useEffect(() => {
@@ -45,6 +47,7 @@ const App = ({ isGuest, setIsGuest }) => {
 
   //   return () => clearInterval(timer);
   // }, [isPaused]);
+
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -91,6 +94,8 @@ const App = ({ isGuest, setIsGuest }) => {
     setShowSecondScreen(true);
   };
 
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
   useEffect(() => {
     if (initialized) {
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
@@ -119,7 +124,36 @@ const App = ({ isGuest, setIsGuest }) => {
     setInitialized(true);
   }, []);
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  useEffect(() => {
+    const savedTrans = JSON.parse(localStorage.getItem("transcriptions")) || {};
+    const savedSum = JSON.parse(localStorage.getItem("summaries")) || {};
+
+    setLiveTranscription(savedTrans);
+    setSummaries(savedSum);
+
+    if (!isAmbientListening) {
+    setLiveTranscription(savedTrans[selectedClient] || "");
+  }
+    setSummary(savedSum[selectedClient] || "");
+  }, [selectedClient]);
+
+  useEffect(() => {
+    if (selectedClient && liveTranscription) {
+      setTranscriptions((prev) => {
+        const updated = { ...prev, [selectedClient]: liveTranscription };
+        localStorage.setItem("transcriptions", JSON.stringify(updated));
+        return updated;
+      });
+    }
+  }, [liveTranscription, selectedClient]);
+
+  useEffect(() => {
+    if (selectedClient && summary !== undefined) {
+      const updated = { ...summaries, [selectedClient]: summary };
+      setSummaries(updated);
+      localStorage.setItem("summaries", JSON.stringify(updated));
+    }
+  }, [summary]);
 
   const createNewChat = () => {
     const newChatId = Date.now().toString();
@@ -290,7 +324,10 @@ const App = ({ isGuest, setIsGuest }) => {
                 </div>
                 {/*Insights Section */}
                 <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-40 md:h-auto overflow-auto">
-                  <Insights insights={insights} selectedClient={selectedClient} />
+                  <Insights
+                    insights={insights}
+                    selectedClient={selectedClient}
+                  />
                 </div>
               </div>
             </div>
