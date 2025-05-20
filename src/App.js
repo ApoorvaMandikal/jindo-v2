@@ -10,6 +10,7 @@ import RealtimeTranscription from "./Components/RealtimeTranscription";
 import Insights from "./Components/Insights";
 import { useClientFileAndInsights } from "./hooks/useClientFileAndInsights";
 import Client_Sidebar from "./Components/Sidebar/Client_Sidebar";
+import { useClientData } from "./hooks/useClientData";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -20,20 +21,27 @@ const App = ({ isGuest, setIsGuest }) => {
   const [initialized, setInitialized] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showSecondScreen, setShowSecondScreen] = useState(false);
-  const [isAmbientListening, setIsAmbientListening] = useState(false);
+  //  const [isAmbientListening, setIsAmbientListening] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [transcription, setTranscription] = useState("");
-  const [summary, setSummary] = useState("");
+  //  const [summary, setSummary] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [liveTranscription, setLiveTranscription] = useState("");
+  //  const [liveTranscription, setLiveTranscription] = useState("");
   const [screen, setScreen] = useState("home");
   const [selectedClient, setSelectedClient] = useState("Cindy_Johnson");
   const { clientFileText, insights } = useClientFileAndInsights(selectedClient);
-  const [transcriptions, setTranscriptions] = useState({});
-  const [summaries, setSummaries] = useState({});
-  
+  // const [transcriptions, setTranscriptions] = useState({});
+  // const [summaries, setSummaries] = useState({});
+  const {
+    liveTranscription,
+    setLiveTranscription,
+    summary,
+    setSummary,
+    isAmbientListening,
+    setIsAmbientListening,
+  } = useClientData(selectedClient);
 
   //Ambient Listening
   // useEffect(() => {
@@ -47,7 +55,6 @@ const App = ({ isGuest, setIsGuest }) => {
 
   //   return () => clearInterval(timer);
   // }, [isPaused]);
-
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -124,36 +131,36 @@ const App = ({ isGuest, setIsGuest }) => {
     setInitialized(true);
   }, []);
 
-  useEffect(() => {
-    const savedTrans = JSON.parse(localStorage.getItem("transcriptions")) || {};
-    const savedSum = JSON.parse(localStorage.getItem("summaries")) || {};
+  // useEffect(() => {
+  //   const savedTrans = JSON.parse(localStorage.getItem("transcriptions")) || {};
+  //   const savedSum = JSON.parse(localStorage.getItem("summaries")) || {};
 
-    setLiveTranscription(savedTrans);
-    setSummaries(savedSum);
+  //   setLiveTranscription(savedTrans);
+  //   setSummaries(savedSum);
 
-    if (!isAmbientListening) {
-    setLiveTranscription(savedTrans[selectedClient] || "");
-  }
-    setSummary(savedSum[selectedClient] || "");
-  }, [selectedClient]);
+  //   if (!isAmbientListening) {
+  //     setLiveTranscription(savedTrans[selectedClient] || "");
+  //   }
+  //   setSummary(savedSum[selectedClient] || "");
+  // }, [selectedClient]);
 
-  useEffect(() => {
-    if (selectedClient && liveTranscription) {
-      setTranscriptions((prev) => {
-        const updated = { ...prev, [selectedClient]: liveTranscription };
-        localStorage.setItem("transcriptions", JSON.stringify(updated));
-        return updated;
-      });
-    }
-  }, [liveTranscription, selectedClient]);
+  // useEffect(() => {
+  //   if (selectedClient && liveTranscription) {
+  //     setTranscriptions((prev) => {
+  //       const updated = { ...prev, [selectedClient]: liveTranscription };
+  //       localStorage.setItem("transcriptions", JSON.stringify(updated));
+  //       return updated;
+  //     });
+  //   }
+  // }, [liveTranscription, selectedClient]);
 
-  useEffect(() => {
-    if (selectedClient && summary !== undefined) {
-      const updated = { ...summaries, [selectedClient]: summary };
-      setSummaries(updated);
-      localStorage.setItem("summaries", JSON.stringify(updated));
-    }
-  }, [summary]);
+  // useEffect(() => {
+  //   if (selectedClient && summary !== undefined) {
+  //     const updated = { ...summaries, [selectedClient]: summary };
+  //     setSummaries(updated);
+  //     localStorage.setItem("summaries", JSON.stringify(updated));
+  //   }
+  // }, [summary]);
 
   const createNewChat = () => {
     const newChatId = Date.now().toString();
