@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Rolling from "./../assets/Rolling.svg";
 
 const Transcription = ({ transcription, loading, liveTranscription }) => {
+  const transcriptionEndRef = useRef(null);
+
+  useEffect(() => {
+    if (transcriptionEndRef.current) {
+      transcriptionEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [liveTranscription]);
   return (
     <div className="flex flex-col h-full">
       {" "}
@@ -15,9 +22,12 @@ const Transcription = ({ transcription, loading, liveTranscription }) => {
             <span className="ml-2 text-gray-500">Transcribing...</span>
           </div>
         ) : (
-          <p className="text-gray-700 whitespace-pre-wrap">
-            {liveTranscription ||"Listening..."}
-          </p>
+          <>
+            <p className="text-gray-700 whitespace-pre-wrap">
+              {liveTranscription || "Listening..."}
+            </p>
+            <div ref={transcriptionEndRef} />
+          </>
         )}
       </div>
     </div>
