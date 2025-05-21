@@ -30,7 +30,7 @@ const App = ({ isGuest, setIsGuest }) => {
   const [loading, setLoading] = useState(false);
   //  const [liveTranscription, setLiveTranscription] = useState("");
   const [screen, setScreen] = useState("home");
-  const [selectedClient, setSelectedClient] = useState("Cindy_Johnson");
+  const [selectedClient, setSelectedClient] = useState("");
   const { clientFileText, insights } = useClientFileAndInsights(selectedClient);
   // const [transcriptions, setTranscriptions] = useState({});
   // const [summaries, setSummaries] = useState({});
@@ -327,6 +327,10 @@ const App = ({ isGuest, setIsGuest }) => {
                     transcription={transcription}
                     loading={loading}
                     liveTranscription={liveTranscription}
+                    selectedClient={selectedClient}
+                    setSummary={setSummary}
+                    setLiveTranscription={setLiveTranscription}
+                    setSelectedClient={setSelectedClient}
                   />
                 </div>
                 {/*Insights Section */}

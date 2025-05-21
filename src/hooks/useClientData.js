@@ -13,10 +13,21 @@ export function useClientData(selectedClient) {
     const savedTrans = JSON.parse(localStorage.getItem("transcriptions")) || {};
     const savedSum = JSON.parse(localStorage.getItem("summaries")) || {};
 
-    const clientTrans = savedTrans[selectedClient] || "";
-    const clientSum = savedSum[selectedClient] || "";
+    const clientTrans = Object.prototype.hasOwnProperty.call(
+      savedTrans,
+      selectedClient
+    )
+      ? savedTrans[selectedClient]
+      : "";
 
-    if (!isAmbientListening && savedTrans[selectedClient]) {
+    const clientSum = Object.prototype.hasOwnProperty.call(
+      savedSum,
+      selectedClient
+    )
+      ? savedSum[selectedClient]
+      : "";
+
+    if (!isAmbientListening) {
       setLiveTranscription(savedTrans[selectedClient]);
     }
 
