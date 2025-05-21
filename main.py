@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from fastapi import Request
 import pdfplumber
+from fastapi import APIRouter
+
 
 
 
@@ -172,6 +174,7 @@ async def generate_insights(request: Request):
         return {"insights": insights}
 
     except Exception as e:
+
         return {"error": "Request failed", "details": str(e)}
 
 #client_file
@@ -194,3 +197,15 @@ async def load_client_file(client_id: str):
 
     except Exception as e:
         return {"error": "Failed to read PDF file", "details": str(e)}
+
+#Client List
+CLIENT_FILES_DIR = "./Clients/"
+
+@app.get("/list-clients")
+def list_clients():
+    try:
+        files = os.listdir(CLIENT_FILES_DIR)
+        clients = [os.path.splitext(f)[0] for f in files if f.endswith(".pdf")]  # or .txt etc.
+        return {"clients": clients}
+    except Exception as e:
+        return {"error": str(e)}

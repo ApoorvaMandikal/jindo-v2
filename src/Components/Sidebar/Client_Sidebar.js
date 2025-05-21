@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import jindo_color2 from "./../../assets/Jindo_color2.png";
 import close from "../../assets/close.png";
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -11,7 +11,26 @@ const Client_Sidebar = ({
   selectedClient,
   setSelectedClient,
 }) => {
-  const clients = ["Cindy_Johnson", "John_Doe"]; // later replace with dynamic list from backend or state
+  //const clients = ["Cindy_Johnson", "John_Doe","Alex_Johnson","David_Lee","Ethan_Davis","Jane_Smith","Priya_Patel","Sarah_Green","Olivia_Brown","Li_Chen","John_Don","Maria_Rodriguez"]; // later replace with dynamic list from backend or state
+  const [clients, setClients] = useState([]);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/list-clients");
+        const data = await res.json();
+        if (data.clients) {
+          setClients(data.clients);
+        } else {
+          console.warn("Failed to load clients", data);
+        }
+      } catch (err) {
+        console.error("Error fetching clients:", err);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   return (
     <div
@@ -19,7 +38,7 @@ const Client_Sidebar = ({
         isOpen ? "translate-x-0" : "-translate-x-full md:w-1/5 md:h-full"
       }`}
     >
-      <div className="p-4 flex flex-col space-y-4 overflow-y-auto max-h-screen">
+      <div className="p-4 flex flex-col space-y-4 max-h-screen">
         {/* Logo and close */}
         <div className="flex justify-between md:justify-center items-center">
           <button onClick={toggleSidebar} className="md:hidden">
@@ -46,23 +65,28 @@ const Client_Sidebar = ({
         </button>
 
         {/* Client Tabs */}
-        <div className="space-y-2">
-          {clients.map((name) => (
-            <div key={name} className="flex justify-between items-center mx-2">
-              <button
-                onClick={() => setSelectedClient(name)}
-                className={`w-full text-left py-2 px-4 rounded-lg transition ${
-                  selectedClient === name
-                    ? "bg-white text-black font-semibold"
-                    : "hover:bg-gray-800"
-                }`}
+        <div className="flex flex-col flex-1 overflow-y-auto">
+          <div className="space-y-2">
+            {clients.map((name) => (
+              <div
+                key={name}
+                className="flex justify-between items-center mx-2"
               >
-                {name.replace("_", " ")}
-              </button>
-              {/* Optional delete icon — implement when needed */}
-              {/* <RiDeleteBin6Line onClick={() => handleDeleteClient(name)} className="text-red-400 cursor-pointer ml-2" /> */}
-            </div>
-          ))}
+                <button
+                  onClick={() => setSelectedClient(name)}
+                  className={`w-full text-left py-2 px-4 rounded-lg transition ${
+                    selectedClient === name
+                      ? "bg-white text-black font-semibold"
+                      : "hover:bg-gray-800"
+                  }`}
+                >
+                  {name.replace("_", " ")}
+                </button>
+                {/* Optional delete icon — implement when needed */}
+                {/* <RiDeleteBin6Line onClick={() => handleDeleteClient(name)} className="text-red-400 cursor-pointer ml-2" /> */}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
