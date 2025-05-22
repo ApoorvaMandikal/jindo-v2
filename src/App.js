@@ -288,14 +288,14 @@ const App = ({ isGuest, setIsGuest }) => {
                   setLoading={setLoading}
                 />
               </div>
-              <div className="md:absolute self-center top-4 md:left-36 lg:left-72">
+              {/* <div className="md:absolute self-center top-4 md:left-36 lg:left-72">
                 <RealtimeTranscription
                   isAmbientListening={isAmbientListening}
                   setIsAmbientListening={setIsAmbientListening}
                   setLiveTranscription={setLiveTranscription}
                   setLoading={setLoading}
                 />
-              </div>
+              </div> */}
 
               <div className="flex-1 grid grid-rows-[auto_auto] md:grid-rows-3 grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-5/6 w-full overflow-auto">
                 {/* Chatbot Section */}
@@ -331,6 +331,9 @@ const App = ({ isGuest, setIsGuest }) => {
                     setSummary={setSummary}
                     setLiveTranscription={setLiveTranscription}
                     setSelectedClient={setSelectedClient}
+                    setLoading={setLoading}
+                    isAmbientListening={isAmbientListening}
+                    setIsAmbientListening={setIsAmbientListening}
                   />
                 </div>
                 {/*Insights Section */}

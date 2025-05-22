@@ -167,7 +167,7 @@ const RealtimeTranscription = ({
   return (
     <div>
       <div className="space-x-4">
-        <button
+        {/* <button
           onClick={startWebRTCTranscription}
           className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200"
         >
@@ -178,6 +178,16 @@ const RealtimeTranscription = ({
           className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
         >
           Stop Transcription
+        </button> */}
+        <button
+          onClick={() => setIsAmbientListening((prev) => !prev)}
+          className={`text-white px-4 rounded-lg transition duration-200 ${
+            isAmbientListening
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
+        >
+          {isAmbientListening ? "Stop" : "Start"}
         </button>
       </div>
 

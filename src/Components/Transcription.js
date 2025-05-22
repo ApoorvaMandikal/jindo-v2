@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import Rolling from "./../assets/Rolling.svg";
 import { MdOutlineRefresh } from "react-icons/md";
+import RealtimeTranscription from "./RealtimeTranscription";
 
 const Transcription = ({
   transcription,
@@ -10,6 +11,9 @@ const Transcription = ({
   setLiveTranscription,
   setSummary,
   setSelectedClient,
+  setLoading,
+  isAmbientListening,
+  setIsAmbientListening,
 }) => {
   const transcriptionEndRef = useRef(null);
 
@@ -47,14 +51,18 @@ const Transcription = ({
     }
     setLiveTranscription("");
     setSummary("");
-    
-    
   };
   return (
     <div className="flex flex-col h-full">
       {" "}
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-row justify-between items-center">
         <h2 className="text-lg font-bold mb-2">Transcription</h2>
+        <RealtimeTranscription
+          isAmbientListening={isAmbientListening}
+          setIsAmbientListening={setIsAmbientListening}
+          setLiveTranscription={setLiveTranscription}
+          setLoading={setLoading}
+        />
         <button onClick={refreshStorage} className="">
           <MdOutlineRefresh className="h-6 w-6" />
         </button>
