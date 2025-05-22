@@ -1,29 +1,45 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect } from "react";
 
-export function useClientFileAndInsights(clientName) {
-  const hasRun = useRef(false);
+export function useClientFileAndInsights(selectedClient) {
   const [clientFileText, setClientFileText] = useState("");
   const [insights, setInsights] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (hasRun.current) return;
-      hasRun.current = true;
+    if (!selectedClient) return;
 
+    const cachedInsights = localStorage.getItem(`insights_${selectedClient}`);
+    const cachedText = localStorage.getItem(`clientText_${selectedClient}`);
+
+    if (cachedInsights && cachedText) {
+      setClientFileText(cachedText);
+      setInsights(cachedInsights);
+      console.log("✅ Used cached insights and client text");
+      return;
+    }
+
+    const fetchData = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/load-client-file/${clientName}`
+          `http://127.0.0.1:8000/load-client-file/${selectedClient}`
         );
         const data = await res.json();
 
-        if (!data.file_text) {
-          console.warn("Client file not loaded:", data);
+        const text = data.file_text;
+        if (!text) {
+          console.warn("⚠️ No file text returned");
           return;
         }
 
-        console.log("✅ client file loaded:", data);
-        const text = data.file_text;
         setClientFileText(text);
+        localStorage.setItem(`clientText_${selectedClient}`, text);
+
+        // Re-check if insights are already cached to avoid regeneration
+        const cached = localStorage.getItem(`insights_${selectedClient}`);
+        if (cached) {
+          setInsights(cached);
+          console.log("🧠 Used cached insights after fetching file");
+          return;
+        }
 
         const insightsRes = await fetch("http://127.0.0.1:8000/insights", {
           method: "POST",
@@ -32,20 +48,23 @@ export function useClientFileAndInsights(clientName) {
         });
 
         const insightsData = await insightsRes.json();
-        console.log("🧠 Insights response:", insightsData);
-
         if (insightsData.insights) {
           setInsights(insightsData.insights);
+          localStorage.setItem(
+            `insights_${selectedClient}`,
+            insightsData.insights
+          );
+          console.log("✅ Generated and cached insights");
         } else {
-          console.warn("⚠️ Insights not generated:", insightsData);
+          console.warn("⚠️ No insights generated");
         }
       } catch (err) {
-        console.error("Error fetching client file or insights:", err);
+        console.error("❌ Error loading client file or insights:", err);
       }
     };
 
     fetchData();
-  }, [clientName]);
+  }, [selectedClient]);
 
   return { clientFileText, insights };
 }

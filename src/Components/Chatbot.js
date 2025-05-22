@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Rolling from "./../assets/Rolling.svg";
 import next from "./../assets/next.png";
@@ -12,7 +12,8 @@ const Chatbot = ({
   setCurrentChatId,
   transcription,
   setTranscription,
-  clientFileText
+  clientFileText,
+  selectedClient,
 }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,8 +22,13 @@ const Chatbot = ({
   const [recognitionInstance, setRecognitionInstance] = useState(null);
   const [initialized, setInitialized] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const messagesEndRef = useRef(null);
 
-
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatHistory, currentChatId]);
 
   async function sendMessageToModel(conversation, clientFileText) {
     try {
@@ -51,7 +57,10 @@ const Chatbot = ({
 
       const response = await axios.post(
         "http://localhost:8000/chat", // ✅ Calls FastAPI backend
-                {
+        //"https://54.80.147.140/chat",
+        //"https://demo.jindolabs.com/chat",
+
+        {
           model: "gpt-4o", // Choose your model
           messages: messages,
           stream: false, // Standard API call (not streaming)
@@ -103,68 +112,92 @@ const Chatbot = ({
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    if (!currentChatId) {
-      const defaultChatId = Date.now().toString();
-      const defaultChat = { date: new Date().toISOString(), messages: [] };
+    let newChatId = currentChatId;
 
-      setChatHistory((prev) => ({
-        ...prev,
-        [defaultChatId]: defaultChat,
-      }));
-      setCurrentChatId(defaultChatId);
+    const clientChats = chatHistory[selectedClient] || {};
+    const currentMessages = clientChats[newChatId]?.messages || [];
 
-      localStorage.setItem(
-        "chatHistory",
-        JSON.stringify({
-          ...chatHistory,
-          [defaultChatId]: defaultChat,
-        })
-      );
-      localStorage.setItem("currentChatId", defaultChatId);
+    if (!newChatId) {
+      newChatId = Date.now().toString();
+      const newChat = {
+        date: new Date().toISOString(),
+        messages: [],
+        name: generateChatName(input),
+      };
+
+      const updatedClientChats = {
+        ...clientChats,
+        [newChatId]: newChat,
+      };
+      const updatedHistory = {
+        ...chatHistory,
+        [selectedClient]: updatedClientChats,
+      };
+
+      setChatHistory(updatedHistory);
+      setCurrentChatId(newChatId);
+      localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
+      localStorage.setItem("currentChatId", newChatId);
     }
 
     setLoading(true);
     setError("");
 
-    const newMessage = { role: "user", content: input };
+    const newMessage = {
+      role: "user",
+      content: input,
+      timestamp: new Date().toISOString(),
+    };
 
-    if (chatHistory[currentChatId]?.messages.length === 0) {
-      setChatHistory((prev) => {
-        const updatedChat = {
-          ...prev[currentChatId],
-          name: generateChatName(input),
-          messages: [...prev[currentChatId].messages, newMessage],
-        };
-        return { ...prev, [currentChatId]: updatedChat };
-      });
-    } else {
-      setChatHistory((prev) => {
-        const updatedChat = {
-          ...prev[currentChatId],
-          messages: [...(prev[currentChatId]?.messages || []), newMessage],
-        };
-        return { ...prev, [currentChatId]: updatedChat };
-      });
-    }
+    // Add user message
+    const updatedUserChat = {
+      ...(clientChats[newChatId] || {}),
+      name: clientChats[newChatId]?.name || generateChatName(input),
+      messages: [...(clientChats[newChatId]?.messages || []), newMessage],
+    };
+
+    const tempClientChats = {
+      ...clientChats,
+      [newChatId]: updatedUserChat,
+    };
+
+    const tempHistory = {
+      ...chatHistory,
+      [selectedClient]: tempClientChats,
+    };
+
+    setChatHistory(tempHistory);
 
     try {
       const assistantReply = await sendMessageToModel(
-        [...(chatHistory[currentChatId]?.messages || []), newMessage],
-        clientFileText //
+        updatedUserChat.messages,
+        clientFileText
       );
 
-      setChatHistory((prev) => {
-        const updatedChat = {
-          ...prev[currentChatId],
-          messages: [
-            ...(prev[currentChatId]?.messages || []),
-            { role: "assistant", content: assistantReply },
-          ],
-        };
-        const updatedHistory = { ...prev, [currentChatId]: updatedChat };
-        localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
-        return updatedHistory;
-      });
+      const updatedAssistantChat = {
+        ...updatedUserChat,
+        messages: [
+          ...updatedUserChat.messages,
+          {
+            role: "assistant",
+            content: assistantReply,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      };
+
+      const updatedClientChats = {
+        ...tempClientChats,
+        [newChatId]: updatedAssistantChat,
+      };
+
+      const updatedHistory = {
+        ...chatHistory,
+        [selectedClient]: updatedClientChats,
+      };
+
+      setChatHistory(updatedHistory);
+      localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
     } catch (error) {
       setError(error.message);
     } finally {
@@ -231,7 +264,7 @@ const Chatbot = ({
         className={`w-full flex-1 pr-2 space-y-4 overflow-y-auto pr-2 pb-16
 
                 ${
-                  chatHistory[currentChatId]?.messages?.length
+                  chatHistory[selectedClient]?.[currentChatId]
                     ? "flex-1"
                     : "justify-center items-center"
                 }
@@ -239,28 +272,39 @@ const Chatbot = ({
              `}
       >
         {" "}
-        {(chatHistory[currentChatId]?.messages || []).map((message, idx) => (
-          <div
-            key={idx}
-            className={`flex ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
+        {(chatHistory[selectedClient]?.[currentChatId]?.messages || []).map(
+          (message, idx) => (
             <div
-              className={`px-4 py-2 rounded-lg ${
-                message.role === "user"
-                  ? "bg-jindo-blue text-white self-end"
-                  : "bg-gray-200 text-gray-800 self-start"
+              key={idx}
+              className={`flex ${
+                message.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              {(message.content || "").split("\n").map((line, idx) => (
-                <p key={idx} className="mb-1">
-                  {line}
-                </p>
-              ))}
+              <div
+                className={`px-4 py-2 rounded-lg ${
+                  message.role === "user"
+                    ? "bg-jindo-blue text-white self-end"
+                    : "bg-gray-200 text-gray-800 self-start"
+                }`}
+              >
+                {(message.content || "").split("\n").map((line, idx) => (
+                  <p key={idx} className="mb-1">
+                    {line}
+                  </p>
+                ))}
+                {message.timestamp && (
+                  <p className="text-xs mt-1 opacity-60">
+                    {new Date(message.timestamp).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
+        <div ref={messagesEndRef} />
       </div>
       {error && (
         <div className="text-red-600 text-sm text-center">

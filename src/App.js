@@ -9,6 +9,8 @@ import AmbientListener from "./Components/AmbientListener";
 import RealtimeTranscription from "./Components/RealtimeTranscription";
 import Insights from "./Components/Insights";
 import { useClientFileAndInsights } from "./hooks/useClientFileAndInsights";
+import Client_Sidebar from "./Components/Sidebar/Client_Sidebar";
+import { useClientData } from "./hooks/useClientData";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -19,17 +21,27 @@ const App = ({ isGuest, setIsGuest }) => {
   const [initialized, setInitialized] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showSecondScreen, setShowSecondScreen] = useState(false);
-  const [isAmbientListening, setIsAmbientListening] = useState(false);
+  //  const [isAmbientListening, setIsAmbientListening] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [transcription, setTranscription] = useState("");
-  const [summary, setSummary] = useState("");
+  //  const [summary, setSummary] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [liveTranscription, setLiveTranscription] = useState("");
-  const openAiKey = process.env.REACT_APP_OPENAI_API_KEY;
+  //  const [liveTranscription, setLiveTranscription] = useState("");
   const [screen, setScreen] = useState("home");
-  const { clientFileText, insights} = useClientFileAndInsights("Cindy_Johnson");
+  const [selectedClient, setSelectedClient] = useState("");
+  const { clientFileText, insights } = useClientFileAndInsights(selectedClient);
+  // const [transcriptions, setTranscriptions] = useState({});
+  // const [summaries, setSummaries] = useState({});
+  const {
+    liveTranscription,
+    setLiveTranscription,
+    summary,
+    setSummary,
+    isAmbientListening,
+    setIsAmbientListening,
+  } = useClientData(selectedClient);
 
   //Ambient Listening
   // useEffect(() => {
@@ -89,6 +101,8 @@ const App = ({ isGuest, setIsGuest }) => {
     setShowSecondScreen(true);
   };
 
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
   useEffect(() => {
     if (initialized) {
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
@@ -117,7 +131,36 @@ const App = ({ isGuest, setIsGuest }) => {
     setInitialized(true);
   }, []);
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  // useEffect(() => {
+  //   const savedTrans = JSON.parse(localStorage.getItem("transcriptions")) || {};
+  //   const savedSum = JSON.parse(localStorage.getItem("summaries")) || {};
+
+  //   setLiveTranscription(savedTrans);
+  //   setSummaries(savedSum);
+
+  //   if (!isAmbientListening) {
+  //     setLiveTranscription(savedTrans[selectedClient] || "");
+  //   }
+  //   setSummary(savedSum[selectedClient] || "");
+  // }, [selectedClient]);
+
+  // useEffect(() => {
+  //   if (selectedClient && liveTranscription) {
+  //     setTranscriptions((prev) => {
+  //       const updated = { ...prev, [selectedClient]: liveTranscription };
+  //       localStorage.setItem("transcriptions", JSON.stringify(updated));
+  //       return updated;
+  //     });
+  //   }
+  // }, [liveTranscription, selectedClient]);
+
+  // useEffect(() => {
+  //   if (selectedClient && summary !== undefined) {
+  //     const updated = { ...summaries, [selectedClient]: summary };
+  //     setSummaries(updated);
+  //     localStorage.setItem("summaries", JSON.stringify(updated));
+  //   }
+  // }, [summary]);
 
   const createNewChat = () => {
     const newChatId = Date.now().toString();
@@ -166,7 +209,7 @@ const App = ({ isGuest, setIsGuest }) => {
   return (
     <div className="flex h-screen font-sans">
       {/* Sidebar */}
-      <Sidebar
+      <Client_Sidebar
         isOpen={isSidebarOpen}
         toggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
         chatHistory={chatHistory}
@@ -175,6 +218,8 @@ const App = ({ isGuest, setIsGuest }) => {
         createNewChat={createNewChat}
         onDeleteChat={deleteChat}
         setScreen={setScreen}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
       />
 
       {isSidebarOpen && (
@@ -243,14 +288,14 @@ const App = ({ isGuest, setIsGuest }) => {
                   setLoading={setLoading}
                 />
               </div>
-              <div className="md:absolute self-center top-4 md:left-36 lg:left-72">
+              {/* <div className="md:absolute self-center top-4 md:left-36 lg:left-72">
                 <RealtimeTranscription
                   isAmbientListening={isAmbientListening}
                   setIsAmbientListening={setIsAmbientListening}
                   setLiveTranscription={setLiveTranscription}
                   setLoading={setLoading}
                 />
-              </div>
+              </div> */}
 
               <div className="flex-1 grid grid-rows-[auto_auto] md:grid-rows-3 grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-5/6 w-full overflow-auto">
                 {/* Chatbot Section */}
@@ -263,6 +308,7 @@ const App = ({ isGuest, setIsGuest }) => {
                     transcription={transcription}
                     setTranscription={setTranscription}
                     clientFileText={clientFileText}
+                    selectedClient={selectedClient}
                   />
                 </div>
                 {/* Summary Section */}
@@ -272,6 +318,7 @@ const App = ({ isGuest, setIsGuest }) => {
                     summary={summary}
                     generateSummary={generateSummary}
                     loadingSummary={loadingSummary}
+                    selectedClient={selectedClient}
                   />
                 </div>
                 {/* Transcript Section */}
@@ -280,11 +327,21 @@ const App = ({ isGuest, setIsGuest }) => {
                     transcription={transcription}
                     loading={loading}
                     liveTranscription={liveTranscription}
+                    selectedClient={selectedClient}
+                    setSummary={setSummary}
+                    setLiveTranscription={setLiveTranscription}
+                    setSelectedClient={setSelectedClient}
+                    setLoading={setLoading}
+                    isAmbientListening={isAmbientListening}
+                    setIsAmbientListening={setIsAmbientListening}
                   />
                 </div>
                 {/*Insights Section */}
                 <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-40 md:h-auto overflow-auto">
-                  <Insights insights={insights} />
+                  <Insights
+                    insights={insights}
+                    selectedClient={selectedClient}
+                  />
                 </div>
               </div>
             </div>

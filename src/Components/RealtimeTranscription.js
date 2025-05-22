@@ -22,7 +22,11 @@ const RealtimeTranscription = ({
 
   const getEphemeralToken = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/generate-token");
+      const response = await fetch(
+        "http://127.0.0.1:8000/generate-token"
+        //"https://54.80.147.140/generate-token"
+        //"https://demo.jindolabs.com/generate-token"
+      );
       const data = await response.json();
       return data.client_secret?.value || null;
     } catch (error) {
@@ -96,7 +100,10 @@ const RealtimeTranscription = ({
       });
 
       if (!response.ok) {
-        console.error("❌ Failed to connect to OpenAI Realtime API", await response.text());
+        console.error(
+          "❌ Failed to connect to OpenAI Realtime API",
+          await response.text()
+        );
         return;
       }
 
@@ -160,7 +167,7 @@ const RealtimeTranscription = ({
   return (
     <div>
       <div className="space-x-4">
-        <button
+        {/* <button
           onClick={startWebRTCTranscription}
           className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200"
         >
@@ -171,6 +178,16 @@ const RealtimeTranscription = ({
           className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
         >
           Stop Transcription
+        </button> */}
+        <button
+          onClick={() => setIsAmbientListening((prev) => !prev)}
+          className={`text-white px-4 rounded-lg transition duration-200 ${
+            isAmbientListening
+              ? "bg-red-600 hover:bg-red-700"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
+        >
+          {isAmbientListening ? "Stop" : "Start"}
         </button>
       </div>
 
@@ -181,7 +198,5 @@ const RealtimeTranscription = ({
     </div>
   );
 };
-
-
 
 export default RealtimeTranscription;
