@@ -10,14 +10,19 @@ const Client_Sidebar = ({
   setScreen,
   selectedClient,
   setSelectedClient,
+  setClients,
+  clients
 }) => {
   //const clients = ["Cindy_Johnson", "John_Doe","Alex_Johnson","David_Lee","Ethan_Davis","Jane_Smith","Priya_Patel","Sarah_Green","Olivia_Brown","Li_Chen","John_Don","Maria_Rodriguez"]; // later replace with dynamic list from backend or state
-  const [clients, setClients] = useState([]);
+//  const [clients, setClients] = useState([]);
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/list-clients");
+        const res = await fetch(
+          "http://127.0.0.1:8000/list-clients"
+         //"https://demo.jindolabs.com/list-clients" 
+        );
         const data = await res.json();
         if (data.clients) {
           setClients(data.clients);

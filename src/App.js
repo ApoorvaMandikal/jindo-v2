@@ -29,9 +29,11 @@ const App = ({ isGuest, setIsGuest }) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [loading, setLoading] = useState(false);
   //  const [liveTranscription, setLiveTranscription] = useState("");
-  const [screen, setScreen] = useState("home");
+  const [screen, setScreen] = useState("chat");
   const [selectedClient, setSelectedClient] = useState("");
   const { clientFileText, insights } = useClientFileAndInsights(selectedClient);
+    const [clients, setClients] = useState([]);
+  
   // const [transcriptions, setTranscriptions] = useState({});
   // const [summaries, setSummaries] = useState({});
   const {
@@ -55,6 +57,12 @@ const App = ({ isGuest, setIsGuest }) => {
 
   //   return () => clearInterval(timer);
   // }, [isPaused]);
+
+  useEffect(() => {
+    if (!selectedClient && clients.length > 0) {
+      setSelectedClient(clients[0]); // auto-pick first client
+    }
+  }, [clients, selectedClient]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -220,6 +228,8 @@ const App = ({ isGuest, setIsGuest }) => {
         setScreen={setScreen}
         selectedClient={selectedClient}
         setSelectedClient={setSelectedClient}
+        clients={clients}
+        setClients={setClients}
       />
 
       {isSidebarOpen && (
@@ -263,7 +273,7 @@ const App = ({ isGuest, setIsGuest }) => {
 
         {/* Main Screen */}
         <div className="flex-1 bg-white py-2 px-6 md:h-5/6">
-          {screen == "home" ? (
+          {/* {screen == "home" ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <button
                 className="bg-orange-500 text-white py-3 px-6 rounded-full mb-4"
@@ -277,7 +287,7 @@ const App = ({ isGuest, setIsGuest }) => {
                 email, and the internet. Just say “Hi Jindo” and ask away!
               </p>
             </div>
-          ) : (
+          ) : ( */}
             <div className="flex flex-col h-auto gap-4 md:h-full">
               {/* Ambient Listener Section */}
               <div className="md:absolute self-center md:top-4 md:left-4 hidden">
@@ -345,7 +355,7 @@ const App = ({ isGuest, setIsGuest }) => {
                 </div>
               </div>
             </div>
-          )}
+          {/* )} */}
         </div>
       </div>
     </div>
