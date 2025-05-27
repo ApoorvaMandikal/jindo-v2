@@ -71,12 +71,14 @@ const Transcription = ({
         {loading ? (
           <div className="flex">
             <img src={Rolling} alt="Loading..." className="h-6 w-6" />
-            <span className="ml-2 text-gray-500">Transcribing...</span>
+            <span className="ml-2 text-gray-500">loading...</span>
           </div>
         ) : (
           <>
             <p className="text-gray-700 whitespace-pre-wrap">
-              {liveTranscription || "Listening..."}
+              {!isAmbientListening && !liveTranscription
+                ? "Waiting to listen..."
+                : liveTranscription || "Listening..."}
             </p>
             <div ref={transcriptionEndRef} />
           </>
