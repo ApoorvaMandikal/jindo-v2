@@ -3,9 +3,14 @@ import { useState, useEffect } from "react";
 export function useClientFileAndInsights(selectedClient) {
   const [clientFileText, setClientFileText] = useState("");
   const [insights, setInsights] = useState("");
+  const [insightsLoading, setInsightsLoading] = useState(false);
 
   useEffect(() => {
     if (!selectedClient) return;
+
+    setClientFileText("");
+    setInsights("");
+    setInsightsLoading(true);
 
     const cachedInsights = localStorage.getItem(`insights_${selectedClient}`);
     const cachedText = localStorage.getItem(`clientText_${selectedClient}`);
@@ -13,14 +18,17 @@ export function useClientFileAndInsights(selectedClient) {
     if (cachedInsights && cachedText) {
       setClientFileText(cachedText);
       setInsights(cachedInsights);
+      setInsightsLoading(false);
       console.log("✅ Used cached insights and client text");
       return;
     }
 
     const fetchData = async () => {
+      setInsightsLoading(true);
       try {
         const res = await fetch(
           `http://127.0.0.1:8000/load-client-file/${selectedClient}`
+          // `https://demo.jindolabs.com/load-client-file/${selectedClient}`
         );
         const data = await res.json();
 
@@ -41,11 +49,15 @@ export function useClientFileAndInsights(selectedClient) {
           return;
         }
 
-        const insightsRes = await fetch("http://127.0.0.1:8000/insights", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-        });
+        const insightsRes = await fetch(
+          "http://127.0.0.1:8000/insights",
+          //"https://demo.jindolabs.com/insights"
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          }
+        );
 
         const insightsData = await insightsRes.json();
         if (insightsData.insights) {
@@ -60,11 +72,13 @@ export function useClientFileAndInsights(selectedClient) {
         }
       } catch (err) {
         console.error("❌ Error loading client file or insights:", err);
+      } finally {
+        setInsightsLoading(false); // finish loading
       }
     };
 
     fetchData();
   }, [selectedClient]);
 
-  return { clientFileText, insights };
+  return { clientFileText, insights, insightsLoading };
 }

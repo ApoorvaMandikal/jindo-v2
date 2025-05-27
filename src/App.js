@@ -31,7 +31,11 @@ const App = ({ isGuest, setIsGuest }) => {
   //  const [liveTranscription, setLiveTranscription] = useState("");
   const [screen, setScreen] = useState("chat");
   const [selectedClient, setSelectedClient] = useState("");
-  const { clientFileText, insights } = useClientFileAndInsights(selectedClient);
+  const {
+    clientFileText,
+    insights,
+    loadingInsights: loadingInsights,
+  } = useClientFileAndInsights(selectedClient);
   const [clients, setClients] = useState([]);
 
   // const [transcriptions, setTranscriptions] = useState({});
@@ -349,7 +353,17 @@ const App = ({ isGuest, setIsGuest }) => {
               </div>
               {/*Insights Section */}
               <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-72 md:h-full overflow-auto">
-                <Insights insights={insights} selectedClient={selectedClient} />
+                {loadingInsights ? (
+                  <div className="flex justify-center items-center h-full text-gray-500">
+                    <span className="animate-spin h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full"></span>
+                    <span className="ml-2">Loading insights...</span>
+                  </div>
+                ) : (
+                  <Insights
+                    insights={insights}
+                    selectedClient={selectedClient}
+                  />
+                )}
               </div>
             </div>
           </div>
