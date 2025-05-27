@@ -4,6 +4,7 @@ const RealtimeTranscription = ({
   setLiveTranscription,
   isAmbientListening,
   setIsAmbientListening,
+  setLoading,
 }) => {
   const peerConnectionRef = useRef(null);
   const dataChannelRef = useRef(null);
@@ -66,7 +67,6 @@ const RealtimeTranscription = ({
         const message = JSON.parse(e.data);
         if (message.transcript) {
           console.log("📝 Live Transcription:", message.transcript);
-
           setLiveTranscription((prev) => prev + " " + message.transcript);
         }
       } catch (error) {
@@ -115,6 +115,7 @@ const RealtimeTranscription = ({
     } catch (error) {
       console.error("🚨 Error during WebRTC signaling:", error);
     }
+    setLoading(false);
   };
 
   const stopWebRTCTranscription = () => {
@@ -163,6 +164,12 @@ const RealtimeTranscription = ({
 
     console.log("✅ Transcription stopped successfully.");
   };
+  const transButton = () => {
+    setIsAmbientListening((prev) => !prev);
+    if (!isAmbientListening) {
+      setLoading(true);
+    }
+  };
 
   return (
     <div>
@@ -180,7 +187,7 @@ const RealtimeTranscription = ({
           Stop Transcription
         </button> */}
         <button
-          onClick={() => setIsAmbientListening((prev) => !prev)}
+          onClick={transButton}
           className={`text-white px-4 rounded-lg transition duration-200 ${
             isAmbientListening
               ? "bg-red-600 hover:bg-red-700"
