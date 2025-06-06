@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from fastapi import Request
 import pdfplumber
 from fastapi import APIRouter
+import json
+
 
 
 
@@ -134,7 +136,6 @@ async def generate_summary(request: Request):
     except Exception as e:
         return {"error": "Request failed", "details": str(e)}
 
-#Insights
 @app.post("/insights")
 async def generate_insights(request: Request):
     if not OPENAI_API_KEY:
@@ -142,7 +143,7 @@ async def generate_insights(request: Request):
 
     data = await request.json()
     text = data.get("text", "")
-    
+
     if not text.strip():
         return {"error": "No text provided for insights"}
 
@@ -152,7 +153,7 @@ async def generate_insights(request: Request):
     }
 
     messages = [
-        {"role": "system", "content": "Summarize this file and highlight the key main 3 points in short."},
+        {"role": "system", "content": "Extract the age, location, and how long the person has been a client. Also summarize the file into 3 key points. Respond in this exact JSON format: {\"age\": int, \"location\": str, \"duration\": str, \"insights\": [str, str, str]}"},
         {"role": "user", "content": text}
     ]
 
@@ -166,15 +167,24 @@ async def generate_insights(request: Request):
             },
         )
 
-        if response.status_code != 200:
-            return {"error": "Failed to generate insights", "details": response.text}
-
         result = response.json()
-        insights = result["choices"][0]["message"]["content"]
-        return {"insights": insights}
+        content = result["choices"][0]["message"]["content"]
+
+        # Clean up triple backtick wrapping if present
+        if content.startswith("```json"):
+            content = content.strip("```json").strip("```").strip()
+        elif content.startswith("```"):
+            content = content.strip("```").strip()
+
+        # Try parsing the content as JSON (in case GPT follows instructions)
+        try:
+            extracted = json.loads(content)
+            return extracted
+        except Exception as e:
+            # Fallback: Return raw content if parsing fails
+            return {"raw_insights": content}
 
     except Exception as e:
-
         return {"error": "Request failed", "details": str(e)}
 
 #client_file

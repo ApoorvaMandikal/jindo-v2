@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 export function useClientFileAndInsights(selectedClient) {
   const [clientFileText, setClientFileText] = useState("");
   const [insights, setInsights] = useState("");
+  const [age, setAge] = useState(null);
+  const [location, setLocation] = useState("");
+  const [duration, setDuration] = useState("");
   const [insightsLoading, setInsightsLoading] = useState(false);
 
   useEffect(() => {
@@ -10,17 +13,29 @@ export function useClientFileAndInsights(selectedClient) {
 
     setClientFileText("");
     setInsights("");
+    setAge(null);
+    setLocation("");
+    setDuration("");
     setInsightsLoading(true);
 
     const cachedInsights = localStorage.getItem(`insights_${selectedClient}`);
     const cachedText = localStorage.getItem(`clientText_${selectedClient}`);
 
     if (cachedInsights && cachedText) {
-      setClientFileText(cachedText);
-      setInsights(cachedInsights);
-      setInsightsLoading(false);
-      console.log("✅ Used cached insights and client text");
-      return;
+      try {
+        const parsed = JSON.parse(cachedInsights);
+        setClientFileText(cachedText);
+        setInsights(parsed.insights || []);
+        setAge(parsed.age || null);
+        setLocation(parsed.location || "");
+        setDuration(parsed.duration || "");
+        setInsightsLoading(false);
+        console.log("✅ Used cached insights and client text");
+        return;
+      } catch (err) {
+        console.warn("⚠️ Failed to parse cached insights:", err);
+        // fallback: don't use cached data
+      }
     }
 
     const fetchData = async () => {
@@ -44,7 +59,11 @@ export function useClientFileAndInsights(selectedClient) {
         // Re-check if insights are already cached to avoid regeneration
         const cached = localStorage.getItem(`insights_${selectedClient}`);
         if (cached) {
-          setInsights(cached);
+          const parsed = JSON.parse(cached);
+          setInsights(parsed.insights || []);
+          setAge(parsed.age || null);
+          setLocation(parsed.location || "");
+          setDuration(parsed.duration || "");
           console.log("🧠 Used cached insights after fetching file");
           return;
         }
@@ -61,7 +80,10 @@ export function useClientFileAndInsights(selectedClient) {
 
         const insightsData = await insightsRes.json();
         if (insightsData.insights) {
-          setInsights(insightsData.insights);
+          setInsights(insightsData.insights.join("\n\n"));
+          setAge(insightsData.age || null);
+          setLocation(insightsData.location || "");
+          setDuration(insightsData.duration || "");
           localStorage.setItem(
             `insights_${selectedClient}`,
             insightsData.insights
@@ -80,5 +102,5 @@ export function useClientFileAndInsights(selectedClient) {
     fetchData();
   }, [selectedClient]);
 
-  return { clientFileText, insights, insightsLoading };
+  return { clientFileText, insights, age, location, duration, insightsLoading };
 }

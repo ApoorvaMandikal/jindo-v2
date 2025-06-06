@@ -35,6 +35,7 @@ const App = ({ isGuest, setIsGuest }) => {
     clientFileText,
     insights,
     loadingInsights: loadingInsights,
+    age, location, duration,
   } = useClientFileAndInsights(selectedClient);
   const [clients, setClients] = useState([]);
 
@@ -249,6 +250,10 @@ const App = ({ isGuest, setIsGuest }) => {
           toggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
           isGuest={isGuest}
           setIsGuest={setIsGuest}
+          selectedClient={selectedClient}
+          age={age}
+          duration={duration}
+          location={location}
         />
         {/* Timer and Pause Button
         <div className="flex items-center gap-2 justify-end p-6 absolute">
