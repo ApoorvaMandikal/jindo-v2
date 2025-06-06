@@ -12,6 +12,7 @@ const Header = ({
   age,
   duration,
   location,
+  setActivePanel
 }) => {
   const navigate = useNavigate();
   const logout = () => {
@@ -20,16 +21,35 @@ const Header = ({
 
   return (
     <div className="w-full flex items-center justify-between md:justify-between p-4 bg-white shadow-md">
-      <div className={`text-left py-2 px-4 rounded-lg transition text-lg font-medium`}>
+      <div
+        className={`text-left py-2 px-4 rounded-lg transition text-lg font-medium`}
+      >
         {selectedClient.replace("_", " ")}
       </div>
-      <div className="flex flex-col">
-        
-          <p><strong>Age:</strong> {age ?? "N/A"}</p>
-          <p><strong>Location:</strong> {location || "N/A"}</p>
-          <p><strong>Client Since:</strong> {duration || "N/A"}</p>
-        
+      <div className="flex flex-col text-s">
+        <p>
+          Age: {age ?? "N/A"}
+        </p>
+        <p>
+          Location: {location || "N/A"}
+        </p>
+        <p>
+          Client Since:{duration || "N/A"}
+        </p>
       </div>
+      <button
+        onClick={() => setActivePanel("chat")}
+        className="px-4 py-2 bg-white border rounded hover:bg-gray-100 shadow"
+      >
+        📝 New chat
+      </button>
+      <button
+        onClick={() => setActivePanel("transcription")}
+        className="px-4 py-2 bg-white border rounded hover:bg-gray-100 shadow"
+      >
+        🎙️ New recording with client
+      </button>
+
       <button
         onClick={toggleSidebar}
         className="text-gray-800 text-2xl md:hidden"

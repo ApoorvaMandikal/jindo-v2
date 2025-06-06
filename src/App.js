@@ -35,9 +35,13 @@ const App = ({ isGuest, setIsGuest }) => {
     clientFileText,
     insights,
     loadingInsights: loadingInsights,
-    age, location, duration,
+    age,
+    location,
+    duration,
   } = useClientFileAndInsights(selectedClient);
   const [clients, setClients] = useState([]);
+
+  const [activePanel, setActivePanel] = useState("chat");
 
   // const [transcriptions, setTranscriptions] = useState({});
   // const [summaries, setSummaries] = useState({});
@@ -254,6 +258,7 @@ const App = ({ isGuest, setIsGuest }) => {
           age={age}
           duration={duration}
           location={location}
+          setActivePanel={setActivePanel}
         />
         {/* Timer and Pause Button
         <div className="flex items-center gap-2 justify-end p-6 absolute">
@@ -316,8 +321,8 @@ const App = ({ isGuest, setIsGuest }) => {
                 />
               </div> */}
 
-            <div className="flex-1 grid grid-rows-[auto_auto] md:grid-rows-2 grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-5/6 w-full overflow-auto">
-              {/* Summary Section */}
+            {/* <div className="flex-1 grid grid-rows-[auto_auto] md:grid-rows-2 grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-5/6 w-full overflow-auto">
+               Summary Section 
               <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-2 md:row-start-2 col-start-1 md:col-start-2 row-span-2 h-40 md:h-auto overflow-auto">
                 <Summary
                   liveTranscription={liveTranscription}
@@ -327,7 +332,7 @@ const App = ({ isGuest, setIsGuest }) => {
                   selectedClient={selectedClient}
                 />
               </div>
-              {/* Chatbot Section */}
+               Chatbot Section 
               <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-1 md:row-start-1 col-start-1 md:col-start-2 md:row-span-1 flex flex-col h-72 md:h-full overflow-y-auto">
                 <Chatbot
                   chatHistory={chatHistory}
@@ -341,7 +346,7 @@ const App = ({ isGuest, setIsGuest }) => {
                 />
               </div>
 
-              {/* Transcript Section */}
+               Transcript Section 
               <div className="p-4 border rounded-lg bg-white shadow md:col-start-1 col-span-1 row-span-1 md:row-span-2 row-start-3 md:row-start-2 h-40 md:h-auto overflow-auto">
                 <Transcription
                   transcription={transcription}
@@ -356,7 +361,7 @@ const App = ({ isGuest, setIsGuest }) => {
                   setIsAmbientListening={setIsAmbientListening}
                 />
               </div>
-              {/*Insights Section */}
+              Insights Section 
               <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-72 md:h-full overflow-auto">
                 {loadingInsights ? (
                   <div className="flex justify-center items-center h-full text-gray-500">
@@ -370,6 +375,35 @@ const App = ({ isGuest, setIsGuest }) => {
                   />
                 )}
               </div>
+            </div> */}
+            <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-1 col-start-1 md:col-start-2 md:row-span-2 h-auto md:h-full overflow-y-auto">
+              {activePanel === "chat" && (
+                <Chatbot
+                  chatHistory={chatHistory}
+                  setChatHistory={setChatHistory}
+                  currentChatId={currentChatId}
+                  setCurrentChatId={setCurrentChatId}
+                  transcription={transcription}
+                  setTranscription={setTranscription}
+                  clientFileText={clientFileText}
+                  selectedClient={selectedClient}
+                />
+              )}
+
+              {activePanel === "transcription" && (
+                <Transcription
+                  transcription={transcription}
+                  loading={loading}
+                  liveTranscription={liveTranscription}
+                  selectedClient={selectedClient}
+                  setSummary={setSummary}
+                  setLiveTranscription={setLiveTranscription}
+                  setSelectedClient={setSelectedClient}
+                  setLoading={setLoading}
+                  isAmbientListening={isAmbientListening}
+                  setIsAmbientListening={setIsAmbientListening}
+                />
+              )}
             </div>
           </div>
           {/* )} */}
