@@ -302,7 +302,7 @@ const App = ({ isGuest, setIsGuest }) => {
               </p>
             </div>
           ) : ( */}
-          <div className="flex flex-col h-auto gap-4 md:h-full">
+          <div className="flex flex-row h-auto gap-4 md:h-full">
             {/* Ambient Listener Section */}
             <div className="md:absolute self-center md:top-4 md:left-4 hidden">
               <AmbientListener
@@ -376,7 +376,20 @@ const App = ({ isGuest, setIsGuest }) => {
                 )}
               </div>
             </div> */}
-            <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-1 col-start-1 md:col-start-2 md:row-span-2 h-auto md:h-full overflow-y-auto">
+            {/* Summary from Client Call & Notes row */}
+            <div>
+              <button
+                onClick={() => setActivePanel("insights")}
+                className={`cursor-pointer px-4 py-2 mt-2 border-t pt-2 text-sm bg-white hover:bg-gray-100 ${
+                  activePanel === "insights"
+                    ? "bg-gray-200 font-semibold"
+                    : "text-gray-700"
+                }`}
+              >Summary from Client Call & Notes</button>
+              
+            </div>
+
+            <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-1 col-start-1 md:col-start-2 md:row-span-2 h-auto md:h-full w-full overflow-y-auto">
               {activePanel === "chat" && (
                 <Chatbot
                   chatHistory={chatHistory}
@@ -389,7 +402,6 @@ const App = ({ isGuest, setIsGuest }) => {
                   selectedClient={selectedClient}
                 />
               )}
-
               {activePanel === "transcription" && (
                 <Transcription
                   transcription={transcription}
@@ -404,6 +416,18 @@ const App = ({ isGuest, setIsGuest }) => {
                   setIsAmbientListening={setIsAmbientListening}
                 />
               )}
+              {activePanel === "insights" &&
+                (loadingInsights ? (
+                  <div className="flex justify-center items-center h-full text-gray-500">
+                    <span className="animate-spin h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full"></span>
+                    <span className="ml-2">Loading insights...</span>
+                  </div>
+                ) : (
+                  <Insights
+                    insights={insights}
+                    selectedClient={selectedClient}
+                  />
+                ))}
             </div>
           </div>
           {/* )} */}
