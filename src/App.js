@@ -188,9 +188,22 @@ const App = ({ isGuest, setIsGuest }) => {
     };
 
     setChatHistory((prev) => {
-      const updatedHistory = { ...prev, [newChatId]: newChat };
+      const clientChats = prev[selectedClient] || {};
+
+      const updatedClientChats = {
+        ...clientChats,
+        [newChatId]: newChat,
+      };
+
+      const updatedHistory = {
+        ...prev,
+        [selectedClient]: updatedClientChats,
+      };
+
       localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
       localStorage.setItem("currentChatId", newChatId);
+      localStorage.setItem("selectedClient", selectedClient);
+
       return updatedHistory;
     });
 
@@ -259,6 +272,7 @@ const App = ({ isGuest, setIsGuest }) => {
           duration={duration}
           location={location}
           setActivePanel={setActivePanel}
+          createNewChat={createNewChat}
         />
         {/* Timer and Pause Button
         <div className="flex items-center gap-2 justify-end p-6 absolute">
@@ -378,15 +392,28 @@ const App = ({ isGuest, setIsGuest }) => {
             </div> */}
             {/* Summary from Client Call & Notes row */}
             <div>
+              <Sidebar
+                chatHistory={chatHistory}
+                currentChatId={currentChatId}
+                setCurrentChatId={setCurrentChatId}
+                createNewChat={createNewChat}
+                onDeleteChat={deleteChat}
+                setScreen={setScreen}
+                selectedClient={selectedClient}
+                setSelectedClient={setSelectedClient}
+                clients={clients}
+                setClients={setClients}
+              ></Sidebar>
               <button
                 onClick={() => setActivePanel("insights")}
-                className={`cursor-pointer px-4 py-2 mt-2 border-t pt-2 md:text-sm lg:text-lg bg-white hover:bg-gray-100 ${
+                className={`cursor-pointer px-4 py-2 mt-2 border-t-black-200 pt-2 md:text-sm lg:text-lg bg-white hover:bg-gray-100 ${
                   activePanel === "insights"
                     ? "bg-gray-200 font-semibold"
                     : "text-gray-700"
                 }`}
-              >Summary from Client Call & Notes</button>
-              
+              >
+                Summary from Client Call & Notes
+              </button>
             </div>
 
             <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-1 col-start-1 md:col-start-2 md:row-span-2 h-auto md:h-full w-full overflow-y-auto">

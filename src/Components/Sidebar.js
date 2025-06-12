@@ -4,8 +4,7 @@ import chatIcon from "../assets/chatIcon.png";
 import close from "../assets/close.png";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
-// Helper function to categorize chats by date
-const categorizeChats = (chatHistory) => {
+const categorizeChatsByClient = (chatHistory, selectedClient) => {
   const categories = {
     today: [],
     yesterday: [],
@@ -28,17 +27,21 @@ const categorizeChats = (chatHistory) => {
   const startOf30DaysAgo = new Date(startOfToday);
   startOf30DaysAgo.setDate(startOfToday.getDate() - 30);
 
-  Object.entries(chatHistory).forEach(([chatId, chat]) => {
+  const clientChats = chatHistory[selectedClient] || {};
+
+  Object.entries(clientChats).forEach(([chatId, chat]) => {
     const chatDate = new Date(chat.date);
 
+    const chatEntry = { chatId, ...chat };
+
     if (chatDate >= startOfToday) {
-      categories.today.push({ chatId, ...chat });
+      categories.today.push(chatEntry);
     } else if (chatDate >= startOfYesterday) {
-      categories.yesterday.push({ chatId, ...chat });
+      categories.yesterday.push(chatEntry);
     } else if (chatDate >= startOf7DaysAgo) {
-      categories.past7Days.push({ chatId, ...chat });
+      categories.past7Days.push(chatEntry);
     } else if (chatDate >= startOf30DaysAgo) {
-      categories.past30Days.push({ chatId, ...chat });
+      categories.past30Days.push(chatEntry);
     }
   });
 
@@ -58,16 +61,15 @@ const Sidebar = ({
   createNewChat,
   onDeleteChat,
   setScreen,
+  selectedClient,
 }) => {
-  const categorizedChats = categorizeChats(chatHistory);
+const categorizedChats = categorizeChatsByClient(chatHistory, selectedClient);
 
   return (
     <div
-      className={`md:static md:translate-x-0 fixed top-0 left-0 h-screen w-64 bg-black text-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
-        isOpen ? "translate-x-0" : "-translate-x-full md:w-1/5 md:h-full"
-      }`}
+      className="text-black max-h-84 overflow-y-auto"
     >
-      <div className="p-4 flex flex-col space-y-4 overflow-y-auto max-h-screen">
+      {/* <div className="p-4 flex flex-col space-y-4 overflow-y-auto max-h-screen">
         <div className="flex justify-between md:justify-center items-center">
           <button
             onClick={toggleSidebar}
@@ -81,9 +83,9 @@ const Sidebar = ({
             className="w-28 h-auto hidden md:block"
           />
         </div>
-        <hr className="border-gray-600"></hr>
+        <hr className="border-gray-600"></hr> */}
 
-        <button
+        {/* <button
           className="bg-jindo-blue text-white py-4 px-4 rounded-3xl mx-4 my-8"
           onClick={() => {
             createNewChat();
@@ -91,25 +93,25 @@ const Sidebar = ({
           }}
         >
           + New Conversation
-        </button>
+        </button> */}
 
         {/* Grouped Chats */}
         <div className="space-y-4">
           {/* Today */}
           {categorizedChats.today.length > 0 && (
             <>
-              <p className="text-gray-400">TODAY</p>
+              <p className="text-black-400">TODAY</p>
               {categorizedChats.today.map(({ chatId, date, name }) => (
                 <div
                   key={chatId}
                   className={`p-2 flex flex-row items-center space-x-2 p-2 cursor-pointer rounded-3xl ${
-                    chatId === currentChatId ? "bg-gray-700" : ""
+                    chatId === currentChatId ? "bg-gray-100" : ""
                   }`}
                   onClick={() => setCurrentChatId(chatId)}
                 >
-                  <div className="p-2 rounded-md">
+                  {/* <div className="p-2 rounded-md">
                     <img src={chatIcon} alt="chat" className="h-auto" />
-                  </div>
+                  </div> */}
                   <div className=" flex-1 basis-8/12">
                     <p>
                       {name || "New Chat"}
@@ -212,7 +214,6 @@ const Sidebar = ({
             </>
           )}
         </div>
-      </div>
     </div>
   );
 };
