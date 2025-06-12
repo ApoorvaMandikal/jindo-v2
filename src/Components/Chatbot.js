@@ -261,7 +261,7 @@ const Chatbot = ({
       {" "}
       <h2 className="text-lg font-bold mb-2">Ask Jindo</h2>
       <div
-        className={`w-full flex-1 pr-2 space-y-4 overflow-y-auto pr-2 pb-16
+        className={`w-full flex-1 pr-2 space-y-4 overflow-y-auto pr-2 pb-16 h-1/4
 
                 ${
                   chatHistory[selectedClient]?.[currentChatId]

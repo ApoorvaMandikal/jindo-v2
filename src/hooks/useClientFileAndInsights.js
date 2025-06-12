@@ -86,8 +86,14 @@ export function useClientFileAndInsights(selectedClient) {
           setDuration(insightsData.duration || "");
           localStorage.setItem(
             `insights_${selectedClient}`,
-            insightsData.insights
+            JSON.stringify({
+              insights: insightsData.insights,
+              age: insightsData.age || null,
+              location: insightsData.location || "",
+              duration: insightsData.duration || "",
+            })
           );
+
           console.log("✅ Generated and cached insights");
         } else {
           console.warn("⚠️ No insights generated");

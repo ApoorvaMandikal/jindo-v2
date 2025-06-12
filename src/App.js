@@ -286,7 +286,7 @@ const App = ({ isGuest, setIsGuest }) => {
         </div> */}
 
         {/* Main Screen */}
-        <div className="flex-1 bg-white py-2 px-6 md:h-5/6">
+        <div className="flex-1 bg-white py-6 pt-12 px-6 md:h-4/6">
           {/* {screen == "home" ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <button
@@ -302,7 +302,7 @@ const App = ({ isGuest, setIsGuest }) => {
               </p>
             </div>
           ) : ( */}
-          <div className="flex flex-row h-auto gap-4 md:h-full">
+          <div className="flex flex-row h-auto border-t-2 border-solid gap-4 md:h-full">
             {/* Ambient Listener Section */}
             <div className="md:absolute self-center md:top-4 md:left-4 hidden">
               <AmbientListener
@@ -380,7 +380,7 @@ const App = ({ isGuest, setIsGuest }) => {
             <div>
               <button
                 onClick={() => setActivePanel("insights")}
-                className={`cursor-pointer px-4 py-2 mt-2 border-t pt-2 text-sm bg-white hover:bg-gray-100 ${
+                className={`cursor-pointer px-4 py-2 mt-2 border-t pt-2 md:text-sm lg:text-lg bg-white hover:bg-gray-100 ${
                   activePanel === "insights"
                     ? "bg-gray-200 font-semibold"
                     : "text-gray-700"
