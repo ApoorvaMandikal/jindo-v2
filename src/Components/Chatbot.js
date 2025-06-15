@@ -4,6 +4,7 @@ import Rolling from "./../assets/Rolling.svg";
 import next from "./../assets/next.png";
 import micIcon from "./../assets/micIcon.png";
 import { MdEdit } from "react-icons/md";
+import ReactMarkdown from "react-markdown";
 
 const Chatbot = ({
   chatHistory,
@@ -14,6 +15,7 @@ const Chatbot = ({
   setTranscription,
   clientFileText,
   selectedClient,
+  generateChatName,
 }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -109,6 +111,14 @@ const Chatbot = ({
     setCurrentChatId(newChatId);
   };
 
+  // const generateChatName = (message) => {
+  //   if (!message) return "New Chat";
+  //   const words = message.split(" ");
+  //   words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+  //   const truncated = words.slice(0, 6).join(" ");
+  //   return truncated + (words.length > 6 ? "..." : "");
+  // };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -124,6 +134,7 @@ const Chatbot = ({
         messages: [],
         name: generateChatName(input),
       };
+      console.log(input);
 
       const updatedClientChats = {
         ...clientChats,
@@ -150,9 +161,14 @@ const Chatbot = ({
     };
 
     // Add user message
+    const oldName = clientChats[newChatId]?.name || "";
+    const newName =
+      !oldName || oldName === "New Chat" ? generateChatName(input) : oldName;
+    console.log(input);
+
     const updatedUserChat = {
       ...(clientChats[newChatId] || {}),
-      name: clientChats[newChatId]?.name || generateChatName(input),
+      name: newName,
       messages: [...(clientChats[newChatId]?.messages || []), newMessage],
     };
 
@@ -206,14 +222,6 @@ const Chatbot = ({
     }
   };
 
-  const generateChatName = (message) => {
-    if (!message) return "New Chat";
-    const words = message.split(" ");
-    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-    const truncated = words.slice(0, 6).join(" ");
-    return truncated + (words.length > 6 ? "..." : "");
-  };
-
   const startListening = () => {
     if (isEditing) return;
     if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
@@ -261,7 +269,7 @@ const Chatbot = ({
       {" "}
       <h2 className="text-lg font-bold mb-2">Ask Jindo</h2>
       <div
-        className={`w-full flex-1 pr-2 space-y-4 overflow-y-auto pr-2 pb-16 h-1/4
+        className={`w-full flex-1 pr-2 lg:text-xl space-y-4 overflow-y-auto pr-2 pb-16 h-1/4
 
                 ${
                   chatHistory[selectedClient]?.[currentChatId]
@@ -287,11 +295,9 @@ const Chatbot = ({
                     : "bg-gray-200 text-gray-800 self-start"
                 }`}
               >
-                {(message.content || "").split("\n").map((line, idx) => (
-                  <p key={idx} className="mb-1">
-                    {line}
-                  </p>
-                ))}
+                <ReactMarkdown>
+                  {(message.content || "")}
+                </ReactMarkdown>
                 {message.timestamp && (
                   <p className="text-xs mt-1 opacity-60">
                     {new Date(message.timestamp).toLocaleTimeString([], {

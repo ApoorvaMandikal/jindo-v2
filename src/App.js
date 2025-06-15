@@ -11,6 +11,7 @@ import Insights from "./Components/Insights";
 import { useClientFileAndInsights } from "./hooks/useClientFileAndInsights";
 import Client_Sidebar from "./Components/Sidebar/Client_Sidebar";
 import { useClientData } from "./hooks/useClientData";
+import ChatTranscriptionHistory from "./Components/ChatTranscriptionHistory";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -211,11 +212,11 @@ const App = ({ isGuest, setIsGuest }) => {
   };
 
   const generateChatName = (message) => {
-    if (!message) return "New Chat";
-    const words = message.split(" ");
-    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+    if (!message.trim()) return "New Chat";
+    const words = message.trim().split(/\s+/); // handles extra spaces
     const truncated = words.slice(0, 6).join(" ");
-    return truncated + (words.length > 6 ? "..." : "");
+    const capitalized = truncated.charAt(0).toUpperCase() + truncated.slice(1);
+    return capitalized + (words.length > 6 ? "..." : "");
   };
 
   const handleEditClick = () => {
@@ -316,7 +317,7 @@ const App = ({ isGuest, setIsGuest }) => {
               </p>
             </div>
           ) : ( */}
-          <div className="flex flex-row h-auto border-t-2 border-solid gap-4 md:h-full">
+          <div className="flex flex-row h-auto border-t-2 border-solid md:h-full">
             {/* Ambient Listener Section */}
             <div className="md:absolute self-center md:top-4 md:left-4 hidden">
               <AmbientListener
@@ -391,8 +392,8 @@ const App = ({ isGuest, setIsGuest }) => {
               </div>
             </div> */}
             {/* Summary from Client Call & Notes row */}
-            <div>
-              <Sidebar
+            <div className="border-2 w-2/5 h-3/5">
+              <ChatTranscriptionHistory
                 chatHistory={chatHistory}
                 currentChatId={currentChatId}
                 setCurrentChatId={setCurrentChatId}
@@ -403,10 +404,11 @@ const App = ({ isGuest, setIsGuest }) => {
                 setSelectedClient={setSelectedClient}
                 clients={clients}
                 setClients={setClients}
-              ></Sidebar>
+                setActivePanel={setActivePanel}
+              ></ChatTranscriptionHistory>
               <button
                 onClick={() => setActivePanel("insights")}
-                className={`cursor-pointer px-4 py-2 mt-2 border-t-black-200 pt-2 md:text-sm lg:text-lg bg-white hover:bg-gray-100 ${
+                className={`cursor-pointer px-4 py-2 mt-2 border-2 bottom-0 pt-2 md:text-sm lg:text-lg bg-white hover:bg-gray-100 ${
                   activePanel === "insights"
                     ? "bg-gray-200 font-semibold"
                     : "text-gray-700"
@@ -427,6 +429,7 @@ const App = ({ isGuest, setIsGuest }) => {
                   setTranscription={setTranscription}
                   clientFileText={clientFileText}
                   selectedClient={selectedClient}
+                  generateChatName={generateChatName}
                 />
               )}
               {activePanel === "transcription" && (
