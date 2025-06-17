@@ -11,6 +11,7 @@ import Insights from "./Components/Insights";
 import { useClientFileAndInsights } from "./hooks/useClientFileAndInsights";
 import Client_Sidebar from "./Components/Sidebar/Client_Sidebar";
 import { useClientData } from "./hooks/useClientData";
+import ChatTranscriptionHistory from "./Components/ChatTranscriptionHistory";
 
 const App = ({ isGuest, setIsGuest }) => {
   // const [messages, setMessages] = useState([]);
@@ -31,12 +32,18 @@ const App = ({ isGuest, setIsGuest }) => {
   //  const [liveTranscription, setLiveTranscription] = useState("");
   const [screen, setScreen] = useState("chat");
   const [selectedClient, setSelectedClient] = useState("");
+  const [currentTranscriptionId, setCurrentTranscriptionId] = useState(null);
   const {
     clientFileText,
     insights,
     loadingInsights: loadingInsights,
+    age,
+    location,
+    duration,
   } = useClientFileAndInsights(selectedClient);
   const [clients, setClients] = useState([]);
+
+  const [activePanel, setActivePanel] = useState("chat");
 
   // const [transcriptions, setTranscriptions] = useState({});
   // const [summaries, setSummaries] = useState({});
@@ -183,21 +190,67 @@ const App = ({ isGuest, setIsGuest }) => {
     };
 
     setChatHistory((prev) => {
-      const updatedHistory = { ...prev, [newChatId]: newChat };
+      const clientChats = prev[selectedClient] || {};
+
+      const updatedClientChats = {
+        ...clientChats,
+        [newChatId]: newChat,
+      };
+
+      const updatedHistory = {
+        ...prev,
+        [selectedClient]: updatedClientChats,
+      };
+
       localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
       localStorage.setItem("currentChatId", newChatId);
+      localStorage.setItem("selectedClient", selectedClient);
+
       return updatedHistory;
     });
 
     setCurrentChatId(newChatId);
   };
 
+  const handleNewRecording = () => {
+    const newId = Date.now().toString();
+
+    const newTranscriptionEntry = {
+      type: "transcription",
+      name: "New Recording...",
+      content: "",
+      date: new Date().toISOString(),
+    };
+
+    // Update localStorage
+    const stored = JSON.parse(localStorage.getItem("chatHistory")) || {};
+    const clientData = stored[selectedClient] || {};
+
+    const updatedClientData = {
+      ...clientData,
+      [newId]: newTranscriptionEntry,
+    };
+
+    const updatedHistory = {
+      ...stored,
+      [selectedClient]: updatedClientData,
+    };
+
+    localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
+    localStorage.setItem("currentChatId", newId);
+
+    // Update React state
+    setChatHistory(updatedHistory);
+    setCurrentChatId(newId);
+    setLiveTranscription(""); // optional
+  };
+
   const generateChatName = (message) => {
-    if (!message) return "New Chat";
-    const words = message.split(" ");
-    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+    if (!message.trim()) return "New Chat";
+    const words = message.trim().split(/\s+/); // handles extra spaces
     const truncated = words.slice(0, 6).join(" ");
-    return truncated + (words.length > 6 ? "..." : "");
+    const capitalized = truncated.charAt(0).toUpperCase() + truncated.slice(1);
+    return capitalized + (words.length > 6 ? "..." : "");
   };
 
   const handleEditClick = () => {
@@ -234,6 +287,8 @@ const App = ({ isGuest, setIsGuest }) => {
         setSelectedClient={setSelectedClient}
         clients={clients}
         setClients={setClients}
+        setActivePanel={setActivePanel}
+        activePanel={activePanel}
       />
 
       {isSidebarOpen && (
@@ -249,6 +304,13 @@ const App = ({ isGuest, setIsGuest }) => {
           toggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
           isGuest={isGuest}
           setIsGuest={setIsGuest}
+          selectedClient={selectedClient}
+          age={age}
+          duration={duration}
+          location={location}
+          setActivePanel={setActivePanel}
+          createNewChat={createNewChat}
+          handleNewRecording={handleNewRecording}
         />
         {/* Timer and Pause Button
         <div className="flex items-center gap-2 justify-end p-6 absolute">
@@ -276,7 +338,7 @@ const App = ({ isGuest, setIsGuest }) => {
         </div> */}
 
         {/* Main Screen */}
-        <div className="flex-1 bg-white py-2 px-6 md:h-5/6">
+        <div className="flex-1 bg-white py-6 pt-12 px-6 md:h-4/6">
           {/* {screen == "home" ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <button
@@ -292,7 +354,7 @@ const App = ({ isGuest, setIsGuest }) => {
               </p>
             </div>
           ) : ( */}
-          <div className="flex flex-col h-auto gap-4 md:h-full">
+          <div className="flex flex-row h-auto border-t-2 border-solid md:h-full">
             {/* Ambient Listener Section */}
             <div className="md:absolute self-center md:top-4 md:left-4 hidden">
               <AmbientListener
@@ -311,8 +373,8 @@ const App = ({ isGuest, setIsGuest }) => {
                 />
               </div> */}
 
-            <div className="flex-1 grid grid-rows-[auto_auto] md:grid-rows-2 grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-5/6 w-full overflow-auto">
-              {/* Summary Section */}
+            {/* <div className="flex-1 grid grid-rows-[auto_auto] md:grid-rows-2 grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-5/6 w-full overflow-auto">
+               Summary Section 
               <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-2 md:row-start-2 col-start-1 md:col-start-2 row-span-2 h-40 md:h-auto overflow-auto">
                 <Summary
                   liveTranscription={liveTranscription}
@@ -322,7 +384,7 @@ const App = ({ isGuest, setIsGuest }) => {
                   selectedClient={selectedClient}
                 />
               </div>
-              {/* Chatbot Section */}
+               Chatbot Section 
               <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-1 md:row-start-1 col-start-1 md:col-start-2 md:row-span-1 flex flex-col h-72 md:h-full overflow-y-auto">
                 <Chatbot
                   chatHistory={chatHistory}
@@ -336,7 +398,7 @@ const App = ({ isGuest, setIsGuest }) => {
                 />
               </div>
 
-              {/* Transcript Section */}
+               Transcript Section 
               <div className="p-4 border rounded-lg bg-white shadow md:col-start-1 col-span-1 row-span-1 md:row-span-2 row-start-3 md:row-start-2 h-40 md:h-auto overflow-auto">
                 <Transcription
                   transcription={transcription}
@@ -351,7 +413,7 @@ const App = ({ isGuest, setIsGuest }) => {
                   setIsAmbientListening={setIsAmbientListening}
                 />
               </div>
-              {/*Insights Section */}
+              Insights Section 
               <div className="p-4 border rounded-lg bg-white shadow row-start-4 md:row-start-1 col-span-1 row-span-1 h-72 md:h-full overflow-auto">
                 {loadingInsights ? (
                   <div className="flex justify-center items-center h-full text-gray-500">
@@ -365,6 +427,78 @@ const App = ({ isGuest, setIsGuest }) => {
                   />
                 )}
               </div>
+            </div> */}
+            {/* Summary from Client Call & Notes row */}
+            <div className="border-2 w-2/5 h-3/5">
+              <ChatTranscriptionHistory
+                chatHistory={chatHistory}
+                currentChatId={currentChatId}
+                setCurrentChatId={setCurrentChatId}
+                createNewChat={createNewChat}
+                onDeleteChat={deleteChat}
+                setScreen={setScreen}
+                selectedClient={selectedClient}
+                setSelectedClient={setSelectedClient}
+                clients={clients}
+                setClients={setClients}
+                setActivePanel={setActivePanel}
+              ></ChatTranscriptionHistory>
+              <button
+                onClick={() => setActivePanel("insights")}
+                className={`cursor-pointer px-4 py-2 mt-2 border-2 bottom-0 pt-2 md:text-sm lg:text-lg bg-white hover:bg-gray-100 ${
+                  activePanel === "insights"
+                    ? "bg-gray-200 font-semibold"
+                    : "text-gray-700"
+                }`}
+              >
+                Summary from Client Call & Notes
+              </button>
+            </div>
+
+            <div className="p-4 border rounded-lg bg-white shadow col-span-1 row-start-1 col-start-1 md:col-start-2 md:row-span-2 h-auto md:h-full w-full overflow-y-auto">
+              {activePanel === "chat" && (
+                <Chatbot
+                  chatHistory={chatHistory}
+                  setChatHistory={setChatHistory}
+                  currentChatId={currentChatId}
+                  setCurrentChatId={setCurrentChatId}
+                  transcription={transcription}
+                  setTranscription={setTranscription}
+                  clientFileText={clientFileText}
+                  selectedClient={selectedClient}
+                  generateChatName={generateChatName}
+                />
+              )}
+              {activePanel === "transcription" && (
+                <Transcription
+                  transcription={transcription}
+                  loading={loading}
+                  liveTranscription={liveTranscription}
+                  selectedClient={selectedClient}
+                  setSummary={setSummary}
+                  setLiveTranscription={setLiveTranscription}
+                  setSelectedClient={setSelectedClient}
+                  setLoading={setLoading}
+                  isAmbientListening={isAmbientListening}
+                  setIsAmbientListening={setIsAmbientListening}
+                  chatHistory={chatHistory}
+                  setChatHistory={setChatHistory}
+                  currentChatId={currentChatId}
+                  currentTranscriptionId={currentTranscriptionId}
+                />
+              )}
+              {activePanel === "insights" &&
+                (loadingInsights ? (
+                  <div className="flex justify-center items-center h-full text-gray-500">
+                    <span className="animate-spin h-6 w-6 border-4 border-blue-500 border-t-transparent rounded-full"></span>
+                    <span className="ml-2">Loading insights...</span>
+                  </div>
+                ) : (
+                  <Insights
+                    insights={insights}
+                    selectedClient={selectedClient}
+                  />
+                ))}
             </div>
           </div>
           {/* )} */}
