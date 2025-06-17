@@ -16,6 +16,7 @@ const Header = ({
   location,
   setActivePanel,
   createNewChat,
+  handleNewRecording,
 }) => {
   const navigate = useNavigate();
   const logout = () => {
@@ -36,8 +37,8 @@ const Header = ({
       </div>
       <button
         onClick={() => {
-          createNewChat(); 
-          setActivePanel("chat"); 
+          createNewChat();
+          setActivePanel("chat");
         }}
         className="flex px-4 py-2 bg-white border rounded hover:bg-gray-100 shadow lg:w-1/6 md:text-xs lg:text-sm"
       >
@@ -45,7 +46,10 @@ const Header = ({
         New chat
       </button>
       <button
-        onClick={() => setActivePanel("transcription")}
+        onClick={() => {
+          handleNewRecording();
+          setActivePanel("transcription");
+        }}
         className="flex px-4 py-2 bg-white border rounded hover:bg-gray-100 shadow md:text-xs lg:text-sm"
       >
         <img

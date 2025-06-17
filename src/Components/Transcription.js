@@ -14,41 +14,88 @@ const Transcription = ({
   setLoading,
   isAmbientListening,
   setIsAmbientListening,
+  currentChatId,
+  setChatHistory,
+  chatHistory,
+  currentTranscriptionId,
 }) => {
   const transcriptionEndRef = useRef(null);
+
+  const selectedEntry = chatHistory?.[selectedClient]?.[currentChatId] || null;
+
+  const isLiveTranscription =
+    selectedEntry?.type === "transcription" && !loading;
+
+  const displayedText =
+    isLiveTranscription && selectedEntry?.content
+      ? selectedEntry.content
+      : !isAmbientListening && !liveTranscription
+      ? "Waiting to listen..."
+      : liveTranscription || "Listening...";
+
+  const saveTranscription = (text, clientName, transcriptionId) => {
+    const history = JSON.parse(localStorage.getItem("chatHistory")) || {};
+    const clientHistory = history[clientName] || {};
+
+    const existingEntry = clientHistory[transcriptionId];
+
+    const updatedEntry = existingEntry
+      ? {
+          ...existingEntry,
+          content: (existingEntry.content || "") + "\n" + text,
+          date: new Date().toISOString(), // optionally update the timestamp
+        }
+      : {
+          type: "transcription",
+          name: text.split(" ").slice(0, 6).join(" ") + "...",
+          date: new Date().toISOString(),
+          content: text,
+        };
+
+    const updatedClientData = {
+      ...clientHistory,
+      [transcriptionId]: updatedEntry,
+    };
+
+    const updated = {
+      ...history,
+      [clientName]: updatedClientData,
+    };
+
+    localStorage.setItem("chatHistory", JSON.stringify(updated));
+  };
+
+  // Save only once when transcription completes
+  useEffect(() => {
+    if (liveTranscription && selectedClient && currentTranscriptionId) {
+      saveTranscription(
+        liveTranscription,
+        selectedClient,
+        currentTranscriptionId
+      );
+    }
+  }, [liveTranscription]);
 
   useEffect(() => {
     if (transcriptionEndRef.current) {
       transcriptionEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [liveTranscription]);
+  }, [liveTranscription, currentChatId]);
 
   const refreshStorage = () => {
     const transcriptions =
-      JSON.parse(localStorage.getItem("transcriptions")) || {};
-
-    if (selectedClient in transcriptions) {
-      console.log(
-        `🗑️ Deleting transcription for ${selectedClient}:`,
-        transcriptions[selectedClient]
-      );
+      JSON.parse(localStorage.getItem("chatHistory")) || {};
+    if (transcriptions[selectedClient]) {
       delete transcriptions[selectedClient];
-      localStorage.setItem("transcriptions", JSON.stringify(transcriptions));
-    } else {
-      console.log(`⚠️ No transcription found for ${selectedClient}`);
+      localStorage.setItem("chatHistory", JSON.stringify(transcriptions));
     }
 
     const summaries = JSON.parse(localStorage.getItem("summaries")) || {};
-    if (selectedClient in summaries) {
-      console.log(
-        `🗑️ Deleting summary for ${selectedClient}:`,
-        summaries[selectedClient]
-      );
+    if (summaries[selectedClient]) {
       delete summaries[selectedClient];
       localStorage.setItem("summaries", JSON.stringify(summaries));
-    } else {
-      console.log(`⚠️ No summary found for ${selectedClient}`);
     }
+
     setLiveTranscription("");
     setSummary("");
   };
@@ -62,6 +109,8 @@ const Transcription = ({
           setIsAmbientListening={setIsAmbientListening}
           setLiveTranscription={setLiveTranscription}
           setLoading={setLoading}
+          selectedClient={selectedClient}
+          currentTranscriptionId={currentTranscriptionId}
         />
         <button onClick={refreshStorage} className="">
           <MdOutlineRefresh className="h-6 w-6" />
@@ -75,11 +124,7 @@ const Transcription = ({
           </div>
         ) : (
           <>
-            <p className="text-gray-700 whitespace-pre-wrap">
-              {!isAmbientListening && !liveTranscription
-                ? "Waiting to listen..."
-                : liveTranscription || "Listening..."}
-            </p>
+            <p className="text-gray-700 whitespace-pre-wrap">{displayedText}</p>
             <div ref={transcriptionEndRef} />
           </>
         )}

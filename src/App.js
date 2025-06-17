@@ -32,6 +32,7 @@ const App = ({ isGuest, setIsGuest }) => {
   //  const [liveTranscription, setLiveTranscription] = useState("");
   const [screen, setScreen] = useState("chat");
   const [selectedClient, setSelectedClient] = useState("");
+  const [currentTranscriptionId, setCurrentTranscriptionId] = useState(null);
   const {
     clientFileText,
     insights,
@@ -211,6 +212,39 @@ const App = ({ isGuest, setIsGuest }) => {
     setCurrentChatId(newChatId);
   };
 
+  const handleNewRecording = () => {
+    const newId = Date.now().toString();
+
+    const newTranscriptionEntry = {
+      type: "transcription",
+      name: "New Recording...",
+      content: "",
+      date: new Date().toISOString(),
+    };
+
+    // Update localStorage
+    const stored = JSON.parse(localStorage.getItem("chatHistory")) || {};
+    const clientData = stored[selectedClient] || {};
+
+    const updatedClientData = {
+      ...clientData,
+      [newId]: newTranscriptionEntry,
+    };
+
+    const updatedHistory = {
+      ...stored,
+      [selectedClient]: updatedClientData,
+    };
+
+    localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
+    localStorage.setItem("currentChatId", newId);
+
+    // Update React state
+    setChatHistory(updatedHistory);
+    setCurrentChatId(newId);
+    setLiveTranscription(""); // optional
+  };
+
   const generateChatName = (message) => {
     if (!message.trim()) return "New Chat";
     const words = message.trim().split(/\s+/); // handles extra spaces
@@ -253,6 +287,8 @@ const App = ({ isGuest, setIsGuest }) => {
         setSelectedClient={setSelectedClient}
         clients={clients}
         setClients={setClients}
+        setActivePanel={setActivePanel}
+        activePanel={activePanel}
       />
 
       {isSidebarOpen && (
@@ -274,6 +310,7 @@ const App = ({ isGuest, setIsGuest }) => {
           location={location}
           setActivePanel={setActivePanel}
           createNewChat={createNewChat}
+          handleNewRecording={handleNewRecording}
         />
         {/* Timer and Pause Button
         <div className="flex items-center gap-2 justify-end p-6 absolute">
@@ -444,6 +481,10 @@ const App = ({ isGuest, setIsGuest }) => {
                   setLoading={setLoading}
                   isAmbientListening={isAmbientListening}
                   setIsAmbientListening={setIsAmbientListening}
+                  chatHistory={chatHistory}
+                  setChatHistory={setChatHistory}
+                  currentChatId={currentChatId}
+                  currentTranscriptionId={currentTranscriptionId}
                 />
               )}
               {activePanel === "insights" &&

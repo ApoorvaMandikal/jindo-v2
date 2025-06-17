@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import jindo_color2 from "./../../assets/Jindo_color2.png";
 import close from "../../assets/close.png";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import chatIcon from "../../assets/chatIcon.png";
-
 
 const Client_Sidebar = ({
   isOpen,
@@ -13,17 +12,22 @@ const Client_Sidebar = ({
   selectedClient,
   setSelectedClient,
   setClients,
-  clients
+  setActivePanel,
+  clients,
+  activePanel,
+  setCurrentChatId,
 }) => {
   //const clients = ["Cindy_Johnson", "John_Doe","Alex_Johnson","David_Lee","Ethan_Davis","Jane_Smith","Priya_Patel","Sarah_Green","Olivia_Brown","Li_Chen","John_Don","Maria_Rodriguez"]; // later replace with dynamic list from backend or state
-//  const [clients, setClients] = useState([]);
+  //  const [clients, setClients] = useState([]);
+
+  const pendingClientRef = useRef(null);
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
         const res = await fetch(
           "http://127.0.0.1:8000/list-clients"
-         //"https://demo.jindolabs.com/list-clients" 
+          //"https://demo.jindolabs.com/list-clients"
         );
         const data = await res.json();
         if (data.clients) {
@@ -38,6 +42,13 @@ const Client_Sidebar = ({
 
     fetchClients();
   }, []);
+
+  useEffect(() => {
+    if (pendingClientRef.current === selectedClient && activePanel === "chat") {
+      createNewChat();
+      pendingClientRef.current = null;
+    }
+  }, [selectedClient, activePanel]);
 
   return (
     <div
@@ -80,14 +91,22 @@ const Client_Sidebar = ({
                 className="flex justify-between items-center mx-2"
               >
                 <button
-                  onClick={() => setSelectedClient(name)}
+                  onClick={() => {
+                    pendingClientRef.current = name;
+                    setSelectedClient(name);
+                    setActivePanel("chat");
+                  }}
                   className={`w-full flex text-left py-4 px-2 rounded-lg transition ${
                     selectedClient === name
                       ? "bg-white text-black font-semibold"
                       : "hover:bg-gray-800"
                   }`}
                 >
-                  <img src={chatIcon} alt="chat" className="md:w-8 lg:w-10 h-auto pr-2" />
+                  <img
+                    src={chatIcon}
+                    alt="chat"
+                    className="md:w-8 lg:w-10 h-auto pr-2"
+                  />
                   {name.replace("_", " ")}
                 </button>
                 {/* Optional delete icon — implement when needed */}

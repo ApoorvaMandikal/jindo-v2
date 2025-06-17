@@ -5,10 +5,22 @@ const RealtimeTranscription = ({
   isAmbientListening,
   setIsAmbientListening,
   setLoading,
+  selectedClient,
+  currentTranscriptionId,
 }) => {
   const peerConnectionRef = useRef(null);
   const dataChannelRef = useRef(null);
   const mediaStreamRef = useRef(null);
+  const selectedClientRef = useRef(selectedClient);
+  const currentTranscriptionIdRef = useRef(currentTranscriptionId);
+
+  useEffect(() => {
+    selectedClientRef.current = selectedClient;
+  }, [selectedClient]);
+
+  useEffect(() => {
+    currentTranscriptionIdRef.current = currentTranscriptionId;
+  }, [currentTranscriptionId]);
 
   useEffect(() => {
     if (isAmbientListening) {
@@ -67,7 +79,32 @@ const RealtimeTranscription = ({
         const message = JSON.parse(e.data);
         if (message.transcript) {
           console.log("📝 Live Transcription:", message.transcript);
-          setLiveTranscription((prev) => prev + " " + message.transcript);
+
+          setLiveTranscription((prev) => {
+            const updated = prev + " " + message.transcript;
+
+            // Save to chatHistory under the currentTranscriptionId
+            const stored =
+              JSON.parse(localStorage.getItem("chatHistory")) || {};
+            const clientData = stored[selectedClientRef.current] || {};
+
+            clientData[currentTranscriptionId] = {
+              type: "transcription",
+              name: updated.trim().split(" ").slice(0, 6).join(" ") + "...",
+              content: updated.trim(),
+              date: new Date().toISOString(),
+            };
+
+            localStorage.setItem(
+              "chatHistory",
+              JSON.stringify({
+                ...stored,
+                [selectedClient]: clientData,
+              })
+            );
+
+            return updated;
+          });
         }
       } catch (error) {
         console.error("🚨 Failed to parse message:", e.data, error);

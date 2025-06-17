@@ -153,7 +153,7 @@ async def generate_insights(request: Request):
     }
 
     messages = [
-        {"role": "system", "content": "Extract the age, location, and how long the person has been a client. Also summarize the file into 3 key points. Respond in this exact JSON format: {\"age\": int, \"location\": str, \"duration\": str, \"insights\": [str, str, str]}"},
+        {"role": "system", "content": "Extract the age, location, and how long the person has been a client. If not available, then just respond \"Not Available\". Also summarize the file into 3 key points. Respond in this exact JSON format: {\"age\": int, \"location\": str, \"duration\": str, \"insights\": [str, str, str]}"},
         {"role": "user", "content": text}
     ]
 

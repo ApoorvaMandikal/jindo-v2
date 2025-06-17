@@ -3,26 +3,35 @@ import jindo_color2 from "./../assets/Jindo_color2.png";
 import chat from "../assets/chat.png";
 import close from "../assets/close.png";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import mic from "../assets/microphone-2.png";
 
 const ChatTranscriptionHistory = ({
   chatHistory,
   currentChatId,
   setCurrentChatId,
+  createNewChat,
+  onDeleteChat,
+  setScreen,
   selectedClient,
+  setSelectedClient,
+  clients,
+  setClients,
   setActivePanel,
 }) => {
-
+  console.log(
+    "Rendering chat entries:",
+    Object.entries(chatHistory[selectedClient] || {})
+  );
   return (
     <div className="text-black h-full overflow-y-auto">
-
       <div className="space-y-4">
         {Object.entries(chatHistory[selectedClient] || {})
           .map(([chatId, chat]) => ({
             chatId,
             ...chat,
           }))
-          .sort((a, b) => new Date(b.date) - new Date(a.date)) // 🗓️ Sort by latest first
-          .map(({ chatId, date, name }) => (
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .map(({ chatId, date, name, type }) => (
             <div
               key={chatId}
               className={`p-2 flex flex-row items-center space-x-2 cursor-pointer rounded-3xl ${
@@ -30,14 +39,26 @@ const ChatTranscriptionHistory = ({
               }`}
               onClick={() => {
                 setCurrentChatId(chatId);
-                setActivePanel("chat");
+                setActivePanel(
+                  type === "transcription" ? "transcription" : "chat"
+                );
               }}
             >
               <div className="p-2 rounded-md">
-                <img src={chat} alt="chat" className="h-auto" />
+                {type === "transcription" ? (
+                  <img src={mic} alt="chat" className="h-auto" />
+                ) : (
+                  <img
+                    src={chat}
+                    alt="chat"
+                    className="text-gray-700 w-4 h-4"
+                  />
+                )}
               </div>
               <div className="flex-1 basis-8/12">
-                <p className="text-sm font-medium">{name || "New Chat"}</p>
+                <p className="md:text-xs lg:text-sm font-medium">
+                  {name || "New Chat"}
+                </p>
               </div>
               <p className="text-sm text-black-400 w-12 text-right">
                 {new Date(date).toLocaleDateString("en-US", {
@@ -51,7 +72,6 @@ const ChatTranscriptionHistory = ({
               /> */}
             </div>
           ))}
-
       </div>
     </div>
   );
