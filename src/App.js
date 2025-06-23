@@ -257,18 +257,21 @@ const App = ({ isGuest, setIsGuest }) => {
     setIsEditing(true);
   };
 
-  const deleteChat = (chatID) => {
+  const deleteChat = (chatIdToDelete) => {
     const updatedHistory = { ...chatHistory };
-    delete updatedHistory[chatID];
 
-    localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
+    if (!updatedHistory[selectedClient]) return;
 
-    if (currentChatId === chatID) {
-      const remainingChats = Object.keys(updatedHistory);
+    delete updatedHistory[selectedClient][chatIdToDelete];
+
+    // If the deleted chat was the current one, switch to another
+    if (currentChatId === chatIdToDelete) {
+      const remainingChats = Object.keys(updatedHistory[selectedClient]);
       setCurrentChatId(remainingChats.length ? remainingChats[0] : null);
     }
 
     setChatHistory(updatedHistory);
+    localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
   };
 
   return (

@@ -66,10 +66,13 @@ const ChatTranscriptionHistory = ({
                   day: "2-digit",
                 })}
               </p>
-              {/* <RiDeleteBin6Line
+              <RiDeleteBin6Line
                 className="ml-2 text-gray-500 hover:text-red-500"
-                onClick={() => onDeleteChat(chatId)}
-              /> */}
+                onClick={(e) => {
+                  e.stopPropagation(); 
+                  onDeleteChat(chatId);
+                }}
+              />
             </div>
           ))}
       </div>
