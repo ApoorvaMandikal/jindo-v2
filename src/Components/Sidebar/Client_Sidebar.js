@@ -96,7 +96,7 @@ const Client_Sidebar = ({
                     setSelectedClient(name);
                     setActivePanel("chat");
                   }}
-                  className={`w-full flex text-left py-4 px-2 rounded-lg transition ${
+                  className={`w-full flex text-left py-4 px-2 rounded-lg transition items-center ${
                     selectedClient === name
                       ? "bg-white text-black font-semibold"
                       : "hover:bg-gray-800"
@@ -105,9 +105,9 @@ const Client_Sidebar = ({
                   <img
                     src={chatIcon}
                     alt="chat"
-                    className="md:w-8 lg:w-10 h-auto pr-2"
+                    className="md:w-8 lg:w-10 md:h-6 lg:h-8 pr-2"
                   />
-                  {name.replace("_", " ")}
+                  <div>{name.replace("_", " ")}</div>
                 </button>
                 {/* Optional delete icon — implement when needed */}
                 {/* <RiDeleteBin6Line onClick={() => handleDeleteClient(name)} className="text-red-400 cursor-pointer ml-2" /> */}
