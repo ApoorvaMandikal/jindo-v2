@@ -23,7 +23,7 @@ const ChatTranscriptionHistory = ({
     Object.entries(chatHistory[selectedClient] || {})
   );
   return (
-    <div className="text-black h-full overflow-y-auto">
+    <div className="text-black h-full overflow-y-auto py-2">
       <div className="space-y-4">
         {Object.entries(chatHistory[selectedClient] || {})
           .map(([chatId, chat]) => ({
@@ -69,7 +69,7 @@ const ChatTranscriptionHistory = ({
               <RiDeleteBin6Line
                 className="ml-2 text-gray-500 hover:text-red-500"
                 onClick={(e) => {
-                  e.stopPropagation(); 
+                  e.stopPropagation();
                   onDeleteChat(chatId);
                 }}
               />

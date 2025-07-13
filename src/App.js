@@ -90,9 +90,9 @@ const App = ({ isGuest, setIsGuest }) => {
     try {
       const response = await axios.post(
         // "https://api.openai.com/v1/chat/completions",
-        "http://localhost:8000/summary",
+        //"http://localhost:8000/summary",
         //"https://54.80.147.140/summary",
-        //"https://demo.jindolabs.com/summary",
+        "https://demo.jindolabs.com/summary",
         {
           // model: "gpt-4o", // Choose your model
           // prompt: `Summarize this conversation: ${text}`,
@@ -292,6 +292,7 @@ const App = ({ isGuest, setIsGuest }) => {
         setClients={setClients}
         setActivePanel={setActivePanel}
         activePanel={activePanel}
+        handleNewRecording={handleNewRecording}
       />
 
       {isSidebarOpen && (
