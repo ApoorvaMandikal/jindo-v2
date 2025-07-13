@@ -16,6 +16,7 @@ const Client_Sidebar = ({
   clients,
   activePanel,
   setCurrentChatId,
+  handleNewRecording,
 }) => {
   //const clients = ["Cindy_Johnson", "John_Doe","Alex_Johnson","David_Lee","Ethan_Davis","Jane_Smith","Priya_Patel","Sarah_Green","Olivia_Brown","Li_Chen","John_Don","Maria_Rodriguez"]; // later replace with dynamic list from backend or state
   //  const [clients, setClients] = useState([]);
@@ -26,8 +27,8 @@ const Client_Sidebar = ({
     const fetchClients = async () => {
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/list-clients"
-          //"https://demo.jindolabs.com/list-clients"
+          //"http://127.0.0.1:8000/list-clients"
+          "https://demo.jindolabs.com/list-clients"
         );
         const data = await res.json();
         if (data.clients) {
@@ -43,12 +44,37 @@ const Client_Sidebar = ({
     fetchClients();
   }, []);
 
+  // useEffect(() => {
+  //   if (pendingClientRef.current === selectedClient && activePanel === "chat") {
+  //     createNewChat();
+  //     pendingClientRef.current = null;
+  //   }
+  // }, [selectedClient, activePanel]);
+
   useEffect(() => {
-    if (pendingClientRef.current === selectedClient && activePanel === "chat") {
-      createNewChat();
-      pendingClientRef.current = null;
+  if (!selectedClient) return;
+
+  const history = JSON.parse(localStorage.getItem("chatHistory")) || {};
+  const clientData = history[selectedClient] || {};
+  const sortedEntries = Object.entries(clientData).sort(
+    (a, b) => new Date(b[1].date) - new Date(a[1].date)
+  );
+
+  if (sortedEntries.length > 0) {
+    const [latestChatId, latestChat] = sortedEntries[0];
+    setCurrentChatId(latestChatId);
+    setActivePanel(latestChat.type === "transcription" ? "transcription" : "chat");
+  } else {
+    // No chat/transcription exists for this client
+    if (activePanel === "chat") {
+      createNewChat(); // If on chat tab, create one
+    } else if (activePanel === "transcription") {
+      handleNewRecording();
+      setActivePanel("transcription"); // Optional: may already be active
     }
-  }, [selectedClient, activePanel]);
+  }
+}, [selectedClient]);
+
 
   return (
     <div
@@ -94,9 +120,9 @@ const Client_Sidebar = ({
                   onClick={() => {
                     pendingClientRef.current = name;
                     setSelectedClient(name);
-                    setActivePanel("chat");
+                    //setActivePanel("chat");
                   }}
-                  className={`w-full flex text-left py-4 px-2 rounded-lg transition ${
+                  className={`w-full flex text-left py-4 px-2 rounded-lg transition items-center ${
                     selectedClient === name
                       ? "bg-white text-black font-semibold"
                       : "hover:bg-gray-800"
@@ -105,9 +131,9 @@ const Client_Sidebar = ({
                   <img
                     src={chatIcon}
                     alt="chat"
-                    className="md:w-8 lg:w-10 h-auto pr-2"
+                    className="md:w-8 lg:w-10 md:h-6 lg:h-8 pr-2"
                   />
-                  {name.replace("_", " ")}
+                  <div>{name.replace("_", " ")}</div>
                 </button>
                 {/* Optional delete icon — implement when needed */}
                 {/* <RiDeleteBin6Line onClick={() => handleDeleteClient(name)} className="text-red-400 cursor-pointer ml-2" /> */}

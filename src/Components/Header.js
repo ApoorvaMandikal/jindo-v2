@@ -40,7 +40,7 @@ const Header = ({
           createNewChat();
           setActivePanel("chat");
         }}
-        className="flex px-4 py-2 bg-white border rounded hover:bg-gray-100 shadow lg:w-1/6 md:text-xs lg:text-sm"
+        className="flex px-4 py-2 bg-white border rounded hover:bg-gray-100 shadow md:text-xs lg:text-sm"
       >
         <img src={edit} alt="Sidebar" className="md:w-8 lg:w-10 h-auto px-2" />
         New chat

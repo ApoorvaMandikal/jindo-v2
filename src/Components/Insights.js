@@ -11,7 +11,11 @@ const Insights = ({ selectedClient }) => {
       </div>
       <div className="overflow-y-auto lg:text-xl">
         {insights ? (
-          <ReactMarkdown>{insights.join("\n\n")}</ReactMarkdown>
+          <ReactMarkdown>
+            {Array.isArray(insights)
+              ? insights.join("\n\n")
+              : String(insights || "")}
+          </ReactMarkdown>
         ) : (
           <p>Loading insights...</p>
         )}

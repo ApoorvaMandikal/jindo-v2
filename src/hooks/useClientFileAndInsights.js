@@ -42,8 +42,8 @@ export function useClientFileAndInsights(selectedClient) {
       setInsightsLoading(true);
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/load-client-file/${selectedClient}`
-          // `https://demo.jindolabs.com/load-client-file/${selectedClient}`
+          //`http://127.0.0.1:8000/load-client-file/${selectedClient}`
+           `https://demo.jindolabs.com/load-client-file/${selectedClient}`
         );
         const data = await res.json();
 
@@ -69,8 +69,8 @@ export function useClientFileAndInsights(selectedClient) {
         }
 
         const insightsRes = await fetch(
-          "http://127.0.0.1:8000/insights",
-          //"https://demo.jindolabs.com/insights"
+          //"http://127.0.0.1:8000/insights",
+          "https://demo.jindolabs.com/insights",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

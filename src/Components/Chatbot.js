@@ -58,9 +58,9 @@ const Chatbot = ({
       ];
 
       const response = await axios.post(
-        "http://localhost:8000/chat", // ✅ Calls FastAPI backend
+        //"http://localhost:8000/chat", // ✅ Calls FastAPI backend
         //"https://54.80.147.140/chat",
-        //"https://demo.jindolabs.com/chat",
+        "https://demo.jindolabs.com/chat",
 
         {
           model: "gpt-4o", // Choose your model

@@ -36,9 +36,9 @@ const RealtimeTranscription = ({
   const getEphemeralToken = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/generate-token"
+       //"http://127.0.0.1:8000/generate-token"
         //"https://54.80.147.140/generate-token"
-        //"https://demo.jindolabs.com/generate-token"
+        "https://demo.jindolabs.com/generate-token"
       );
       const data = await response.json();
       return data.client_secret?.value || null;

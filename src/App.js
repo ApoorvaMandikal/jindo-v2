@@ -90,9 +90,9 @@ const App = ({ isGuest, setIsGuest }) => {
     try {
       const response = await axios.post(
         // "https://api.openai.com/v1/chat/completions",
-        "http://localhost:8000/summary",
+        //"http://localhost:8000/summary",
         //"https://54.80.147.140/summary",
-        //"https://demo.jindolabs.com/summary",
+        "https://demo.jindolabs.com/summary",
         {
           // model: "gpt-4o", // Choose your model
           // prompt: `Summarize this conversation: ${text}`,
@@ -257,18 +257,21 @@ const App = ({ isGuest, setIsGuest }) => {
     setIsEditing(true);
   };
 
-  const deleteChat = (chatID) => {
+  const deleteChat = (chatIdToDelete) => {
     const updatedHistory = { ...chatHistory };
-    delete updatedHistory[chatID];
 
-    localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
+    if (!updatedHistory[selectedClient]) return;
 
-    if (currentChatId === chatID) {
-      const remainingChats = Object.keys(updatedHistory);
+    delete updatedHistory[selectedClient][chatIdToDelete];
+
+    // If the deleted chat was the current one, switch to another
+    if (currentChatId === chatIdToDelete) {
+      const remainingChats = Object.keys(updatedHistory[selectedClient]);
       setCurrentChatId(remainingChats.length ? remainingChats[0] : null);
     }
 
     setChatHistory(updatedHistory);
+    localStorage.setItem("chatHistory", JSON.stringify(updatedHistory));
   };
 
   return (
@@ -289,6 +292,7 @@ const App = ({ isGuest, setIsGuest }) => {
         setClients={setClients}
         setActivePanel={setActivePanel}
         activePanel={activePanel}
+        handleNewRecording={handleNewRecording}
       />
 
       {isSidebarOpen && (
